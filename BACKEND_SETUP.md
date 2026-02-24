@@ -1,6 +1,6 @@
 # Secure Resume Auto-Send Setup
 
-This project now supports secure resume auto-send using a backend API (`server.js`).
+This project supports secure resume auto-send using a backend API (`server.js`).
 Your resume stays private on the server and is sent as an email attachment.
 
 ## 1. Install dependencies
@@ -15,13 +15,20 @@ npm install
 cp .env.example .env
 ```
 
-Update `.env`:
+Required:
 
 - `AUTOSEND_API_KEY`: long random secret (at least 32 chars)
 - `ALLOWED_ORIGINS`: your frontend domain(s)
-- `SMTP_*`: your SMTP provider credentials
-- `FROM_NAME` / `FROM_EMAIL`
 - `RESUME_FILE_PATH`: absolute path to your private PDF on the server
+- `FROM_NAME` / `FROM_EMAIL`
+
+Mail provider modes:
+
+1. `EMAIL_PROVIDER=smtp`:
+- Set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` (+ optional port/secure)
+
+2. `EMAIL_PROVIDER=brevo` (recommended on Render free):
+- Set `BREVO_API_KEY`
 
 ## 3. Run backend
 
@@ -46,25 +53,20 @@ In your site Admin -> Settings:
 
 Save settings, then approve a resume request.
 
-## Free safer options
+## Render-specific notes
 
-1. Backend hosting (free tiers):
-- Render Web Service (free tier)
-- Railway trial/free credits
-- Fly.io free allowance (small apps)
+- Set `ALLOWED_ORIGINS` to your frontend Render URL.
+- Set `RESUME_FILE_PATH` to repo path inside Render, e.g.:
 
-2. SMTP providers with free plans:
-- Gmail + App Password (small/personal volume)
-- Brevo (Sendinblue) free tier SMTP
-- Mailgun trial/free tier (region dependent)
+```env
+RESUME_FILE_PATH=/opt/render/project/src/private/SanjayNathan_Resumee.pdf
+```
 
-3. File storage safety:
-- Keep resume on backend filesystem/private storage only.
-- Do not use public Google Drive links for private resumes.
+- Backend now sets `trust proxy` to avoid rate-limit proxy warnings on Render.
+- If SMTP times out on free hosting, use `EMAIL_PROVIDER=brevo` instead of SMTP.
 
 ## Security notes
 
 - API is protected by `x-api-key`, CORS allowlist, rate limiting, and helmet.
 - Do not commit `.env`.
 - Rotate `AUTOSEND_API_KEY` if exposed.
-- For stronger production security, move admin login/auth to backend and replace static localStorage auth.

@@ -23,6 +23,8 @@ const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
 const SMTP_SECURE = String(process.env.SMTP_SECURE || "true").toLowerCase() === "true";
 const SMTP_USER = String(process.env.SMTP_USER || "").trim();
 const SMTP_PASS = String(process.env.SMTP_PASS || "").trim();
+const EMAIL_PROVIDER = String(process.env.EMAIL_PROVIDER || "smtp").trim().toLowerCase();
+const BREVO_API_KEY = String(process.env.BREVO_API_KEY || "").trim();
 const FROM_NAME = String(process.env.FROM_NAME || "Portfolio").trim();
 const FROM_EMAIL = String(process.env.FROM_EMAIL || SMTP_USER).trim();
 const RESUME_FILE_PATH = String(process.env.RESUME_FILE_PATH || "").trim();
@@ -43,8 +45,11 @@ function requireApiKey(req, res, next) {
 }
 
 function validateServerConfig() {
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+  if (EMAIL_PROVIDER === "smtp" && (!SMTP_HOST || !SMTP_USER || !SMTP_PASS)) {
     throw new Error("Missing SMTP configuration. Check SMTP_HOST, SMTP_USER, SMTP_PASS.");
+  }
+  if (EMAIL_PROVIDER === "brevo" && !BREVO_API_KEY) {
+    throw new Error("Missing BREVO_API_KEY for brevo provider.");
   }
   if (!RESUME_FILE_PATH) {
     throw new Error("Missing RESUME_FILE_PATH.");
@@ -57,17 +62,22 @@ function validateServerConfig() {
 }
 
 const resumeAbsolutePath = validateServerConfig();
+const resumeFileName = path.basename(resumeAbsolutePath);
+const resumeFileBase64 = fs.readFileSync(resumeAbsolutePath).toString("base64");
 
-const transporter = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: SMTP_SECURE,
-  auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASS
-  }
-});
+const transporter = EMAIL_PROVIDER === "smtp"
+  ? nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      }
+    })
+  : null;
 
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(express.json({ limit: "32kb" }));
 app.use(cors({
@@ -101,21 +111,49 @@ app.post("/api/send-resume", requireApiKey, async (req, res) => {
       return res.status(400).json({ error: "Invalid recipient email" });
     }
 
-    const info = await transporter.sendMail({
-      from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
-      to: toEmail,
-      subject: "Your requested resume",
-      text: `Hi ${toName},\n\nThanks for your interest. Please find my resume attached.\n\nBest regards,\n${FROM_NAME}`,
-      attachments: [
-        {
-          filename: path.basename(resumeAbsolutePath),
-          path: resumeAbsolutePath,
-          contentType: "application/pdf"
-        }
-      ]
-    });
+    let info = null;
+    if (EMAIL_PROVIDER === "brevo") {
+      const apiRes = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": BREVO_API_KEY
+        },
+        body: JSON.stringify({
+          sender: { name: FROM_NAME, email: FROM_EMAIL },
+          to: [{ email: toEmail, name: toName }],
+          subject: "Your requested resume",
+          textContent: `Hi ${toName},\n\nThanks for your interest. Please find my resume attached.\n\nBest regards,\n${FROM_NAME}`,
+          attachment: [
+            {
+              name: resumeFileName,
+              content: resumeFileBase64
+            }
+          ]
+        })
+      });
+      if (!apiRes.ok) {
+        const errText = await apiRes.text();
+        throw new Error(errText || "Brevo send failed");
+      }
+      info = await apiRes.json();
+    } else {
+      info = await transporter.sendMail({
+        from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
+        to: toEmail,
+        subject: "Your requested resume",
+        text: `Hi ${toName},\n\nThanks for your interest. Please find my resume attached.\n\nBest regards,\n${FROM_NAME}`,
+        attachments: [
+          {
+            filename: resumeFileName,
+            path: resumeAbsolutePath,
+            contentType: "application/pdf"
+          }
+        ]
+      });
+    }
 
-    return res.json({ ok: true, messageId: info.messageId });
+    return res.json({ ok: true, messageId: info.messageId || info.messageId || "sent" });
   } catch (error) {
     console.error("send-resume error", error);
     return res.status(500).json({ error: "Failed to send resume email" });
