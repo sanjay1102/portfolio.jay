@@ -1696,14 +1696,7 @@ function openTrainingDocument(trainingId) {
   }
   const blobUrl = URL.createObjectURL(blob);
   const popup = window.open(blobUrl, "_blank", "noopener,noreferrer");
-  if (!popup) {
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = (item.document && item.document.name) || "training-document";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+  if (!popup) alert("Popup blocked. Please allow popups for this site to view documents.");
   setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
 }
 
