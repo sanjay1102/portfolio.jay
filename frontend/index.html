@@ -680,7 +680,7 @@ footer{
   <h2 class="section-title fade-in">About Me</h2>
   <div class="about-grid">
     <div class="about-text fade-in">
-      <p>I'm a Desktop Support Engineer based in Melbourne, Australia, with a strong foundation in IT support, cloud administration, and infrastructure monitoring. My experience spans enterprise environments, MSP-style operations, and remote global support across Australia and Sri Lanka.</p>
+      <p id="about-intro-text">I'm a Desktop Support Engineer based in Melbourne, Australia, with a strong foundation in IT support, cloud administration, and infrastructure monitoring. My experience spans enterprise environments, MSP-style operations, and remote global support across Australia and Sri Lanka.</p>
       <p>I hold a Bachelor of Information Technology from SLIIT and am currently completing my Certified Cyber Security Professional qualification at Lumify Learn. I'm passionate about building resilient IT systems and delivering exceptional end-user experiences.</p>
       <p>Outside of work, I actively engage with the Australian tech community, attending events like ACS Digital Pulse, and contribute to volunteering initiatives including Clean Up Australia Day and the Australian Tamil Chamber of Commerce.</p>
       <div class="about-info">
@@ -859,7 +859,7 @@ footer{
 <!-- VOLUNTEERING -->
 <section id="volunteering">
   <p class="section-label">// 07. volunteering_log</p>
-  <h2 class="section-title fade-in">Volunteering</h2>
+  <h2 class="section-title fade-in">Volunteering & Professional Engagement</h2>
   <div class="articles-grid" id="volunteering-grid"></div>
 </section>
 
@@ -1232,6 +1232,7 @@ footer{
               <option value="unavailable">🔴 Not looking</option>
             </select>
           </div>
+          <div class="admin-field full-col"><label class="admin-label">About Intro Paragraph</label><textarea class="admin-textarea" id="s-about-intro">I'm a Desktop Support Engineer based in Melbourne, Australia, with a strong foundation in IT support, cloud administration, and infrastructure monitoring. My experience spans enterprise environments, MSP-style operations, and remote global support across Australia and Sri Lanka.</textarea></div>
           <div class="admin-field full-col"><label class="admin-label">Hero Summary Text</label><textarea class="admin-textarea" id="s-summary">IT professional with hands-on experience in Desktop Support, Microsoft 365, Azure AD, Intune, and ITSM workflows. Delivering enterprise-grade support across MSP environments while pursuing Certified Cyber Security Professional certification.</textarea></div>
           <div class="admin-field full-col">
             <label class="admin-label">Profile Photo</label>
@@ -1386,12 +1387,14 @@ function applySettingsToProfile(settings) {
   const heroStatusLocation = document.getElementById("hero-status-location");
   const heroTitleMain = document.getElementById("hero-title-main");
   const heroSummaryText = document.getElementById("hero-summary-text");
+  const aboutIntroText = document.getElementById("about-intro-text");
   const aboutLocation = document.getElementById("about-location");
   const aboutStatus = document.getElementById("about-status");
 
   if (heroStatusLocation) heroStatusLocation.textContent = `${statusLabel} · ${location}`;
   if (heroTitleMain) heroTitleMain.textContent = sanitizeText(settings.title || "Desktop Support Engineer", 90);
   if (heroSummaryText) heroSummaryText.textContent = sanitizeText(settings.summary || "", 500);
+  if (aboutIntroText) aboutIntroText.textContent = sanitizeText(settings.aboutIntro || aboutIntroText.textContent, 650);
   if (aboutLocation) aboutLocation.textContent = location;
   if (aboutStatus) {
     aboutStatus.textContent = statusLabel;
@@ -1413,6 +1416,7 @@ function populateSettingsForm(settings) {
   setVal("s-location", settings.location || "");
   setVal("s-linkedin", settings.linkedin || "");
   setVal("s-summary", settings.summary || "");
+  setVal("s-about-intro", settings.aboutIntro || "");
   setVal("s-default-sender-email", settings.defaultSenderEmail || settings.email || "");
   setVal("s-resume-url", settings.resumeFileUrl || "");
   setVal("s-resume-auto-send", settings.resumeAutoSend || "disabled");
@@ -1624,6 +1628,7 @@ function getDefaultStore() {
       location:"Melbourne, AU",
       linkedin:"https://linkedin.com/in/sanjay-sathiyanathan",
       status:"available",
+      aboutIntro:"I'm a Desktop Support Engineer based in Melbourne, Australia, with a strong foundation in IT support, cloud administration, and infrastructure monitoring. My experience spans enterprise environments, MSP-style operations, and remote global support across Australia and Sri Lanka.",
       summary:"IT professional with hands-on experience in Desktop Support, Microsoft 365, Azure AD, Intune, and ITSM workflows. Delivering enterprise-grade support across MSP environments while pursuing Certified Cyber Security Professional certification.",
       mediumProfileUrl:"",
       mediumArticlesUrl:"",
@@ -2999,6 +3004,7 @@ function saveSettings() {
     location: sanitizeText(document.getElementById("s-location").value, 80),
     linkedin,
     status: document.getElementById("s-status").value,
+    aboutIntro: sanitizeText(document.getElementById("s-about-intro").value, 650),
     summary: sanitizeText(document.getElementById("s-summary").value, 500),
     resumeAutoSend,
     resumeFileUrl,
