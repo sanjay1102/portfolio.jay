@@ -658,17 +658,10 @@ footer{
       </div>
     </div>
     <div class="fade-in" style="transition-delay:0.15s">
-      <p class="section-label" style="margin-bottom:14px;">// Certifications & Training</p>
-      <div id="certs-list">
-        <div class="training-item">Cyber Security Professional — Lumify Learn (2025)</div>
-        <div class="training-item">AWS Solution Architect — Win IT Solutions (2024)</div>
-        <div class="training-item">Docker Training — Win IT Solutions (2024)</div>
-        <div class="training-item">Zabbix Training — Win IT Solutions (2024)</div>
-        <div class="training-item">ITIL Foundation — SLTMOBITEL (2024)</div>
-        <div class="training-item">Azure Administrator — Technet Online Academy (2023)</div>
-        <div class="training-item">PL/SQL & Database Management — SLTMOBITEL (2022)</div>
-        <div class="training-item">IT Support — Google (2021)</div>
-      </div>
+      <p class="section-label" style="margin-bottom:14px;">// Certifications</p>
+      <div id="certs-list"></div>
+      <p class="section-label" style="margin:18px 0 14px;">// Trainings</p>
+      <div id="trainings-list"></div>
     </div>
   </div>
 </section>
@@ -811,7 +804,20 @@ footer{
   </div>
   <div class="articles-cta fade-in">
     <p>More articles published on LinkedIn. Follow for regular insights on IT support, cloud infrastructure, and cybersecurity.</p>
-    <a href="https://www.linkedin.com/in/sanjay-sathiyanathan/" target="_blank" class="btn-primary">View All LinkedIn Articles →</a>
+    <a href="https://www.linkedin.com/in/sanjay-sathiyanathan/" target="_blank" class="btn-primary" id="linkedin-articles-cta">View All LinkedIn Articles →</a>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- MEDIUM ARTICLES -->
+<section id="medium-articles">
+  <p class="section-label">// 06. medium_log</p>
+  <h2 class="section-title fade-in">Medium Articles</h2>
+  <div class="articles-grid" id="medium-articles-grid"></div>
+  <div class="articles-cta fade-in">
+    <p>Technical write-ups and practical guides published on Medium.</p>
+    <a href="https://medium.com" target="_blank" class="btn-primary" id="medium-articles-cta">View All Medium Articles →</a>
   </div>
 </section>
 
@@ -819,7 +825,7 @@ footer{
 
 <!-- CONTACT -->
 <section id="contact">
-  <p class="section-label">// 06. establish_link</p>
+  <p class="section-label">// 07. establish_link</p>
   <h2 class="section-title fade-in">Contact</h2>
   <div class="contact-wrapper">
     <div class="fade-in">
@@ -905,7 +911,9 @@ footer{
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchTab('projects',this)">📁 Projects</button>
         <button class="admin-tab" onclick="switchTab('experience',this)">💼 Experience</button>
+        <button class="admin-tab" onclick="switchTab('credentials',this)">🎓 Credentials</button>
         <button class="admin-tab" onclick="switchTab('articles',this)">📝 Articles</button>
+        <button class="admin-tab" onclick="switchTab('medium',this)">✍ Medium</button>
         <button class="admin-tab" onclick="switchTab('resume',this)">📄 Resume Requests</button>
         <button class="admin-tab" onclick="switchTab('linkedin',this)">🔗 LinkedIn</button>
         <button class="admin-tab" onclick="switchTab('settings',this)">⚙ Settings</button>
@@ -972,6 +980,51 @@ footer{
         </div>
       </div>
 
+      <!-- TAB: CREDENTIALS -->
+      <div class="admin-section" id="tab-credentials">
+        <div class="admin-notice"><strong>Credentials Manager</strong> — Manage certifications and trainings separately. Training documents accept only PDF or image files.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="font-family:Orbitron,monospace;font-size:0.85rem;color:var(--text-primary);">Certifications</h3>
+              <button class="admin-btn primary" onclick="showAddCertification()">+ ADD</button>
+            </div>
+            <div class="items-list" id="admin-certifications-list"></div>
+            <div id="certification-form" style="display:none;margin-top:14px;">
+              <div class="admin-grid">
+                <div class="admin-field full-col"><label class="admin-label">Certification</label><input class="admin-input" id="cf-title" placeholder="e.g. Azure Administrator"/></div>
+                <div class="admin-field"><label class="admin-label">Provider</label><input class="admin-input" id="cf-provider" placeholder="e.g. Microsoft"/></div>
+                <div class="admin-field"><label class="admin-label">Year</label><input class="admin-input" id="cf-year" placeholder="2025"/></div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px;">
+                <button class="admin-btn primary" onclick="saveCertification()">💾 SAVE</button>
+                <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('certification-form').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h3 style="font-family:Orbitron,monospace;font-size:0.85rem;color:var(--text-primary);">Trainings</h3>
+              <button class="admin-btn primary" onclick="showAddTraining()">+ ADD</button>
+            </div>
+            <div class="items-list" id="admin-trainings-list"></div>
+            <div id="training-form" style="display:none;margin-top:14px;">
+              <div class="admin-grid">
+                <div class="admin-field full-col"><label class="admin-label">Training</label><input class="admin-input" id="tf-title" placeholder="e.g. Docker Training"/></div>
+                <div class="admin-field"><label class="admin-label">Provider</label><input class="admin-input" id="tf-provider" placeholder="e.g. Win IT Solutions"/></div>
+                <div class="admin-field"><label class="admin-label">Year</label><input class="admin-input" id="tf-year" placeholder="2024"/></div>
+                <div class="admin-field full-col"><label class="admin-label">Document (PDF/Image only, max 4MB)</label><input class="admin-input" type="file" id="tf-doc" accept=".pdf,image/*"/></div>
+              </div>
+              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;" id="training-doc-status">No document selected.</div>
+              <div style="display:flex;gap:10px;margin-top:8px;">
+                <button class="admin-btn primary" onclick="saveTraining()">💾 SAVE</button>
+                <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('training-form').style.display='none'">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- TAB: ARTICLES -->
       <div class="admin-section" id="tab-articles">
         <div class="admin-notice"><strong>Articles Manager</strong> — Link your LinkedIn articles or any external posts. Paste the exact LinkedIn article URL for each entry. Articles will appear in the Articles section of your portfolio.</div>
@@ -995,6 +1048,37 @@ footer{
             <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('article-form').style.display='none'">Cancel</button>
           </div>
         </div>
+      </div>
+
+      <!-- TAB: MEDIUM -->
+      <div class="admin-section" id="tab-medium">
+        <div class="admin-notice"><strong>Medium Integration</strong> — Add your Medium article links and profile URL.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="font-family:Orbitron,monospace;font-size:0.9rem;color:var(--text-primary);">Medium Articles</h3>
+          <button class="admin-btn primary" onclick="showAddMediumArticle()">+ ADD MEDIUM ARTICLE</button>
+        </div>
+        <div class="items-list" id="admin-medium-articles-list"></div>
+        <hr class="admin-divider"/>
+        <div id="medium-article-form" style="display:none;">
+          <h3 style="font-family:Orbitron,monospace;font-size:0.85rem;color:var(--neon-cyan);margin-bottom:16px;" id="ma-form-title">ADD MEDIUM ARTICLE</h3>
+          <div class="admin-grid">
+            <div class="admin-field full-col"><label class="admin-label">Title</label><input class="admin-input" id="maf-title" placeholder="Article title"/></div>
+            <div class="admin-field full-col"><label class="admin-label">Medium URL (HTTPS)</label><input class="admin-input" id="maf-url" placeholder="https://medium.com/..."/></div>
+            <div class="admin-field"><label class="admin-label">Tag</label><input class="admin-input" id="maf-tag" placeholder="e.g. Cloud"/></div>
+            <div class="admin-field"><label class="admin-label">Year</label><input class="admin-input" id="maf-year" placeholder="2026"/></div>
+            <div class="admin-field full-col"><label class="admin-label">Excerpt</label><textarea class="admin-textarea" id="maf-excerpt" placeholder="Short summary..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button class="admin-btn primary" onclick="saveMediumArticle()">💾 SAVE MEDIUM ARTICLE</button>
+            <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('medium-article-form').style.display='none'">Cancel</button>
+          </div>
+        </div>
+        <hr class="admin-divider"/>
+        <div class="admin-grid">
+          <div class="admin-field"><label class="admin-label">Medium Profile URL</label><input class="admin-input" id="m-profile-url" placeholder="https://medium.com/@yourname"/></div>
+          <div class="admin-field"><label class="admin-label">Medium Articles Page URL</label><input class="admin-input" id="m-articles-url" placeholder="https://medium.com/@yourname/latest"/></div>
+        </div>
+        <button class="admin-btn primary" onclick="saveMediumSettings()">SAVE MEDIUM SETTINGS</button>
       </div>
 
       <!-- TAB: RESUME REQUESTS -->
@@ -1143,13 +1227,17 @@ const VISIT_SESSION_KEY = "ss_site_viewed_session";
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MS = 5 * 60 * 1000;
 const ADMIN_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const MAX_TRAINING_DOC_BYTES = 4 * 1024 * 1024;
 
 function getStore() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORE_KEY)) || getDefaultStore();
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
     if (!Array.isArray(parsed.experiences)) parsed.experiences = getDefaultExperiences();
+    if (!Array.isArray(parsed.certifications)) parsed.certifications = getDefaultCertifications();
+    if (!Array.isArray(parsed.trainings)) parsed.trainings = getDefaultTrainings();
     if (!Array.isArray(parsed.articles)) parsed.articles = [];
+    if (!Array.isArray(parsed.mediumArticles)) parsed.mediumArticles = [];
     if (!Array.isArray(parsed.resumeRequests)) parsed.resumeRequests = [];
     if (!parsed.settings || typeof parsed.settings !== "object") parsed.settings = {};
     return parsed;
@@ -1252,6 +1340,8 @@ function populateSettingsForm(settings) {
   setVal("s-emailjs-template-id", settings.emailjsTemplateId || "");
   setVal("li-profile-url", settings.linkedin || "");
   setVal("li-articles-url", settings.articlesUrl || "");
+  setVal("m-profile-url", settings.mediumProfileUrl || "");
+  setVal("m-articles-url", settings.mediumArticlesUrl || "");
   setVal("s-status", settings.status || "available");
 }
 
@@ -1393,6 +1483,24 @@ function getDefaultExperiences() {
   ];
 }
 
+function getDefaultCertifications() {
+  return [
+    { id: 1, title: "Cyber Security Professional", provider: "Lumify Learn", year: "2025" },
+    { id: 2, title: "AWS Solution Architect", provider: "Win IT Solutions", year: "2024" },
+    { id: 3, title: "ITIL Foundation", provider: "SLTMOBITEL", year: "2024" },
+    { id: 4, title: "Azure Administrator", provider: "Technet Online Academy", year: "2023" }
+  ];
+}
+
+function getDefaultTrainings() {
+  return [
+    { id: 1, title: "Docker Training", provider: "Win IT Solutions", year: "2024", document: null },
+    { id: 2, title: "Zabbix Training", provider: "Win IT Solutions", year: "2024", document: null },
+    { id: 3, title: "PL/SQL & Database Management", provider: "SLTMOBITEL", year: "2022", document: null },
+    { id: 4, title: "IT Support", provider: "Google", year: "2021", document: null }
+  ];
+}
+
 function getDefaultStore() {
   return {
     projects: [
@@ -1402,11 +1510,14 @@ function getDefaultStore() {
       { id:4, title:"Azure Cloud Migration Lab", status:"plan", desc:"Planned project to design and execute a simulated on-premises to Azure cloud migration, documenting the architecture, cost optimisation, and deployment pipeline.", tools:"Azure,Terraform,PowerShell,ARM Templates,Azure AD" }
     ],
     experiences: getDefaultExperiences(),
+    certifications: getDefaultCertifications(),
+    trainings: getDefaultTrainings(),
     articles: [
       { id:1, title:"Getting Started with Azure AD & Intune for Modern Device Management", url:"https://www.linkedin.com/in/sanjay-sathiyanathan/", tag:"IT Support", year:"2025", excerpt:"A practical guide to setting up Azure Active Directory and Microsoft Intune for device enrolment and policy management in enterprise environments..." },
       { id:2, title:"How I Reduced Infrastructure Downtime by 60% with Zabbix & Nagios", url:"https://www.linkedin.com/in/sanjay-sathiyanathan/", tag:"Monitoring", year:"2024", excerpt:"Real-world experience deploying infrastructure monitoring tools in a telco environment — what worked, what didn't, and key lessons learned..." },
       { id:3, title:"From Sri Lanka to Melbourne: My IT Career Journey & Key Lessons", url:"https://www.linkedin.com/in/sanjay-sathiyanathan/", tag:"Career", year:"2025", excerpt:"Reflecting on 5+ years in IT support across two continents — skills that matter, certifications worth pursuing, and advice for aspiring IT professionals..." }
     ],
+    mediumArticles: [],
     resumeRequests: [],
     settings: {
       name:"Sanjay Sathiyanathan",
@@ -1418,6 +1529,8 @@ function getDefaultStore() {
       linkedin:"https://linkedin.com/in/sanjay-sathiyanathan",
       status:"available",
       summary:"IT professional with hands-on experience in Desktop Support, Microsoft 365, Azure AD, Intune, and ITSM workflows. Delivering enterprise-grade support across MSP environments while pursuing Certified Cyber Security Professional certification.",
+      mediumProfileUrl:"",
+      mediumArticlesUrl:"",
       resumeAutoSend:"disabled",
       resumeFileUrl:"",
       resumeBackendUrl:"",
@@ -1467,6 +1580,32 @@ function renderExperiences() {
   }).join("") || "<div style=\"color:var(--text-muted);font-size:0.9rem;\">No experience entries yet.</div>";
 }
 
+function isSafeDocumentDataUrl(value) {
+  const v = String(value || "");
+  return /^data:(application\/pdf|image\/(png|jpeg|jpg|webp|gif));base64,/i.test(v);
+}
+
+function renderCredentials() {
+  const store = getStore();
+  const certsList = document.getElementById("certs-list");
+  const trainingsList = document.getElementById("trainings-list");
+  if (certsList) {
+    certsList.innerHTML = store.certifications.map(c => {
+      const text = `${c.title} — ${c.provider} (${c.year})`;
+      return `<div class="training-item">${escapeHtml(text)}</div>`;
+    }).join("") || `<div style="color:var(--text-muted);font-size:0.85rem;">No certifications yet.</div>`;
+  }
+  if (trainingsList) {
+    trainingsList.innerHTML = store.trainings.map(t => {
+      const text = `${t.title} — ${t.provider} (${t.year})`;
+      const doc = t.document && isSafeDocumentDataUrl(t.document.dataUrl)
+        ? ` <a href="${t.document.dataUrl}" target="_blank" rel="noopener" style="color:var(--neon-cyan);font-size:0.75rem;">View Document</a>`
+        : "";
+      return `<div class="training-item">${escapeHtml(text)}${doc}</div>`;
+    }).join("") || `<div style="color:var(--text-muted);font-size:0.85rem;">No trainings yet.</div>`;
+  }
+}
+
 function renderArticles() {
   const store = getStore();
   const grid = document.getElementById("articles-grid");
@@ -1484,6 +1623,36 @@ function renderArticles() {
       </div>
     </a>`;
   }).join("");
+}
+
+function renderMediumArticles() {
+  const store = getStore();
+  const grid = document.getElementById("medium-articles-grid");
+  if (!grid) return;
+  grid.innerHTML = store.mediumArticles.map((a,i) => {
+    const url = isSafeUrl(a.url) ? a.url : "#";
+    return `
+    <a class="article-card fade-in on" href="${url}" target="_blank" rel="noopener" style="transition-delay:${i*0.1}s">
+      <div class="article-tag">Medium · ${escapeHtml(a.tag)}</div>
+      <div class="article-title">${escapeHtml(a.title)}</div>
+      <div class="article-excerpt">${escapeHtml(a.excerpt)}</div>
+      <div class="article-meta">
+        <span>${escapeHtml(a.year)}</span>
+        <span class="read-more">Read on Medium →</span>
+      </div>
+    </a>`;
+  }).join("") || `<div style="color:var(--text-muted);font-size:0.9rem;">No Medium articles added yet.</div>`;
+}
+
+function applyArticleCtaLinks(settings) {
+  const linkedInCta = document.getElementById("linkedin-articles-cta");
+  const mediumCta = document.getElementById("medium-articles-cta");
+  if (linkedInCta) {
+    linkedInCta.href = settings.articlesUrl || settings.linkedin || "https://www.linkedin.com";
+  }
+  if (mediumCta) {
+    mediumCta.href = settings.mediumArticlesUrl || settings.mediumProfileUrl || "https://medium.com";
+  }
 }
 
 // ══════════════════════════════════
@@ -1558,7 +1727,10 @@ async function doLogin() {
     if (photoInput) photoInput.value = "";
     renderAdminProjects();
     renderAdminExperiences();
+    renderAdminCertifications();
+    renderAdminTrainings();
     renderAdminArticles();
+    renderAdminMediumArticles();
     renderAdminResumeRequests();
     updateAdminStats();
     resetAdminIdleTimer();
@@ -1861,6 +2033,334 @@ function deleteArticle(id) {
   saveStore(store);
   renderAdminArticles();
   renderArticles();
+}
+
+// ══════════════════════════════════
+// ADMIN — CREDENTIALS
+// ══════════════════════════════════
+let editingCertificationId = null;
+let editingTrainingId = null;
+
+function renderAdminCertifications() {
+  const store = getStore();
+  const list = document.getElementById("admin-certifications-list");
+  if (!list) return;
+  list.innerHTML = store.certifications.map(c => `
+    <div class="item-row">
+      <div class="item-row-info">
+        <div class="item-row-title">${escapeHtml(c.title)}</div>
+        <div class="item-row-meta">${escapeHtml(c.provider)} &nbsp;·&nbsp; ${escapeHtml(c.year)}</div>
+      </div>
+      <div class="item-row-actions">
+        <button class="admin-btn" style="padding:6px 14px;font-size:0.62rem;border-color:var(--neon-cyan);color:var(--neon-cyan);" onclick="editCertification(${c.id})">✏ Edit</button>
+        <button class="admin-btn danger" style="padding:6px 14px;font-size:0.62rem;" onclick="deleteCertification(${c.id})">✕ Del</button>
+      </div>
+    </div>
+  `).join("") || "<div style=\"color:var(--text-muted);font-size:0.82rem;padding:14px;\">No certifications yet.</div>";
+}
+
+function showAddCertification() {
+  editingCertificationId = null;
+  document.getElementById("cf-title").value = "";
+  document.getElementById("cf-provider").value = "";
+  document.getElementById("cf-year").value = "";
+  document.getElementById("certification-form").style.display = "block";
+}
+
+function editCertification(id) {
+  const store = getStore();
+  const item = store.certifications.find(x => x.id === id);
+  if (!item) return;
+  editingCertificationId = id;
+  document.getElementById("cf-title").value = item.title || "";
+  document.getElementById("cf-provider").value = item.provider || "";
+  document.getElementById("cf-year").value = item.year || "";
+  document.getElementById("certification-form").style.display = "block";
+}
+
+function saveCertification() {
+  const title = sanitizeText(document.getElementById("cf-title").value, 120);
+  const provider = sanitizeText(document.getElementById("cf-provider").value, 80);
+  const year = sanitizeText(document.getElementById("cf-year").value, 4);
+  if (!title || !provider || !/^\d{4}$/.test(year)) {
+    alert("Certification, provider, and valid 4-digit year are required.");
+    return;
+  }
+  const store = getStore();
+  const item = { id: editingCertificationId || Date.now(), title, provider, year };
+  if (editingCertificationId) {
+    const idx = store.certifications.findIndex(x => x.id === editingCertificationId);
+    if (idx > -1) store.certifications[idx] = item;
+  } else {
+    store.certifications.unshift(item);
+  }
+  saveStore(store);
+  renderAdminCertifications();
+  renderCredentials();
+  document.getElementById("certification-form").style.display = "none";
+  editingCertificationId = null;
+  showToast("Certification saved!");
+}
+
+function deleteCertification(id) {
+  if (!confirm("Delete this certification?")) return;
+  const store = getStore();
+  store.certifications = store.certifications.filter(x => x.id !== id);
+  saveStore(store);
+  renderAdminCertifications();
+  renderCredentials();
+}
+
+function setTrainingDocStatus(text, isError) {
+  const el = document.getElementById("training-doc-status");
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = isError ? "#ff7070" : "var(--text-muted)";
+}
+
+function clearTrainingFormFields() {
+  document.getElementById("tf-title").value = "";
+  document.getElementById("tf-provider").value = "";
+  document.getElementById("tf-year").value = "";
+  const input = document.getElementById("tf-doc");
+  if (input) input.value = "";
+  setTrainingDocStatus("No document selected.", false);
+}
+
+function getTrainingDocumentFromInput() {
+  return new Promise((resolve, reject) => {
+    const input = document.getElementById("tf-doc");
+    const file = input && input.files && input.files[0];
+    if (!file) {
+      resolve(null);
+      return;
+    }
+    const name = sanitizeText(file.name || "training-document", 140);
+    const mimeType = String(file.type || "").toLowerCase();
+    const ext = name.toLowerCase().split(".").pop();
+    const allowedMime = mimeType === "application/pdf" || mimeType.startsWith("image/");
+    const allowedExt = ext === "pdf" || ext === "png" || ext === "jpg" || ext === "jpeg" || ext === "gif" || ext === "webp";
+    if (!allowedMime && !allowedExt) {
+      reject(new Error("Only PDF and image files are allowed."));
+      return;
+    }
+    if (file.size > MAX_TRAINING_DOC_BYTES) {
+      reject(new Error("Document must be 4MB or smaller."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      if (!isSafeDocumentDataUrl(dataUrl)) {
+        reject(new Error("Unsupported document format."));
+        return;
+      }
+      resolve({
+        name,
+        mimeType: mimeType || (ext === "pdf" ? "application/pdf" : "image/*"),
+        size: file.size,
+        dataUrl
+      });
+    };
+    reader.onerror = () => reject(new Error("Could not read the selected file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderAdminTrainings() {
+  const store = getStore();
+  const list = document.getElementById("admin-trainings-list");
+  if (!list) return;
+  list.innerHTML = store.trainings.map(t => `
+    <div class="item-row">
+      <div class="item-row-info">
+        <div class="item-row-title">${escapeHtml(t.title)}</div>
+        <div class="item-row-meta">
+          ${escapeHtml(t.provider)} &nbsp;·&nbsp; ${escapeHtml(t.year)}
+          ${t.document && isSafeDocumentDataUrl(t.document.dataUrl) ? "&nbsp;·&nbsp; <span class=\"status-badge badge-done\">Doc</span>" : ""}
+        </div>
+      </div>
+      <div class="item-row-actions">
+        <button class="admin-btn" style="padding:6px 14px;font-size:0.62rem;border-color:var(--neon-cyan);color:var(--neon-cyan);" onclick="editTraining(${t.id})">✏ Edit</button>
+        <button class="admin-btn danger" style="padding:6px 14px;font-size:0.62rem;" onclick="deleteTraining(${t.id})">✕ Del</button>
+      </div>
+    </div>
+  `).join("") || "<div style=\"color:var(--text-muted);font-size:0.82rem;padding:14px;\">No trainings yet.</div>";
+}
+
+function showAddTraining() {
+  editingTrainingId = null;
+  clearTrainingFormFields();
+  document.getElementById("training-form").style.display = "block";
+}
+
+function editTraining(id) {
+  const store = getStore();
+  const item = store.trainings.find(x => x.id === id);
+  if (!item) return;
+  editingTrainingId = id;
+  document.getElementById("tf-title").value = item.title || "";
+  document.getElementById("tf-provider").value = item.provider || "";
+  document.getElementById("tf-year").value = item.year || "";
+  const input = document.getElementById("tf-doc");
+  if (input) input.value = "";
+  if (item.document && item.document.name) {
+    setTrainingDocStatus(`Existing document: ${item.document.name}. Select a new file to replace.`, false);
+  } else {
+    setTrainingDocStatus("No document selected.", false);
+  }
+  document.getElementById("training-form").style.display = "block";
+}
+
+async function saveTraining() {
+  const title = sanitizeText(document.getElementById("tf-title").value, 120);
+  const provider = sanitizeText(document.getElementById("tf-provider").value, 80);
+  const year = sanitizeText(document.getElementById("tf-year").value, 4);
+  if (!title || !provider || !/^\d{4}$/.test(year)) {
+    alert("Training, provider, and valid 4-digit year are required.");
+    return;
+  }
+
+  const store = getStore();
+  const existing = editingTrainingId ? store.trainings.find(x => x.id === editingTrainingId) : null;
+  let documentValue = existing && existing.document ? existing.document : null;
+  try {
+    const uploaded = await getTrainingDocumentFromInput();
+    if (uploaded) {
+      documentValue = uploaded;
+      setTrainingDocStatus(`Selected: ${uploaded.name}`, false);
+    }
+  } catch (err) {
+    setTrainingDocStatus(String(err.message || "Invalid document."), true);
+    alert(String(err.message || "Invalid document."));
+    return;
+  }
+
+  const item = { id: editingTrainingId || Date.now(), title, provider, year, document: documentValue };
+  if (editingTrainingId) {
+    const idx = store.trainings.findIndex(x => x.id === editingTrainingId);
+    if (idx > -1) store.trainings[idx] = item;
+  } else {
+    store.trainings.unshift(item);
+  }
+  saveStore(store);
+  renderAdminTrainings();
+  renderCredentials();
+  document.getElementById("training-form").style.display = "none";
+  editingTrainingId = null;
+  clearTrainingFormFields();
+  showToast("Training saved!");
+}
+
+function deleteTraining(id) {
+  if (!confirm("Delete this training?")) return;
+  const store = getStore();
+  store.trainings = store.trainings.filter(x => x.id !== id);
+  saveStore(store);
+  renderAdminTrainings();
+  renderCredentials();
+}
+
+// ══════════════════════════════════
+// ADMIN — MEDIUM
+// ══════════════════════════════════
+let editingMediumArticleId = null;
+
+function renderAdminMediumArticles() {
+  const store = getStore();
+  const list = document.getElementById("admin-medium-articles-list");
+  if (!list) return;
+  list.innerHTML = store.mediumArticles.map(a => {
+    const safeUrl = isSafeUrl(a.url) ? a.url : "#";
+    const urlText = safeUrl.length > 50 ? safeUrl.substring(0, 50) + "..." : safeUrl;
+    return `
+    <div class="item-row">
+      <div class="item-row-info">
+        <div class="item-row-title">${escapeHtml(a.title)}</div>
+        <div class="item-row-meta"><span class="status-badge badge-article">${escapeHtml(a.tag)}</span> &nbsp;${escapeHtml(a.year)} &nbsp;·&nbsp; <a href="${safeUrl}" target="_blank" rel="noopener" style="color:var(--neon-cyan);font-size:0.6rem;">${escapeHtml(urlText)}</a></div>
+      </div>
+      <div class="item-row-actions">
+        <button class="admin-btn" style="padding:6px 14px;font-size:0.62rem;border-color:var(--neon-cyan);color:var(--neon-cyan);" onclick="editMediumArticle(${a.id})">✏ Edit</button>
+        <button class="admin-btn danger" style="padding:6px 14px;font-size:0.62rem;" onclick="deleteMediumArticle(${a.id})">✕ Del</button>
+      </div>
+    </div>`;
+  }).join("") || "<div style=\"color:var(--text-muted);font-size:0.82rem;padding:14px;\">No Medium articles yet.</div>";
+  updateAdminStats();
+}
+
+function showAddMediumArticle() {
+  editingMediumArticleId = null;
+  document.getElementById("ma-form-title").textContent = "ADD MEDIUM ARTICLE";
+  ["maf-title", "maf-url", "maf-tag", "maf-year", "maf-excerpt"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("medium-article-form").style.display = "block";
+  document.getElementById("medium-article-form").scrollIntoView({ behavior: "smooth" });
+}
+
+function editMediumArticle(id) {
+  const store = getStore();
+  const a = store.mediumArticles.find(x => x.id === id);
+  if (!a) return;
+  editingMediumArticleId = id;
+  document.getElementById("ma-form-title").textContent = "EDIT MEDIUM ARTICLE";
+  document.getElementById("maf-title").value = a.title || "";
+  document.getElementById("maf-url").value = a.url || "";
+  document.getElementById("maf-tag").value = a.tag || "";
+  document.getElementById("maf-year").value = a.year || "";
+  document.getElementById("maf-excerpt").value = a.excerpt || "";
+  document.getElementById("medium-article-form").style.display = "block";
+  document.getElementById("medium-article-form").scrollIntoView({ behavior: "smooth" });
+}
+
+function saveMediumArticle() {
+  const title = sanitizeText(document.getElementById("maf-title").value, 140);
+  const url = document.getElementById("maf-url").value.trim();
+  const tag = sanitizeText(document.getElementById("maf-tag").value, 40) || "Article";
+  const year = sanitizeText(document.getElementById("maf-year").value, 4) || new Date().getFullYear().toString();
+  const excerpt = sanitizeText(document.getElementById("maf-excerpt").value, 500);
+  if (!title || !url) { alert("Title and URL are required."); return; }
+  if (!isSafeUrl(url)) { alert("Please enter a valid HTTPS URL."); return; }
+  if (!/^\d{4}$/.test(year)) { alert("Year must be 4 digits (e.g. 2026)."); return; }
+  if (!excerpt) { alert("Please add a short excerpt."); return; }
+
+  const store = getStore();
+  const item = { id: editingMediumArticleId || Date.now(), title, url, tag, year, excerpt };
+  if (editingMediumArticleId) {
+    const idx = store.mediumArticles.findIndex(x => x.id === editingMediumArticleId);
+    if (idx > -1) store.mediumArticles[idx] = item;
+  } else {
+    store.mediumArticles.push(item);
+  }
+  saveStore(store);
+  renderAdminMediumArticles();
+  renderMediumArticles();
+  document.getElementById("medium-article-form").style.display = "none";
+  editingMediumArticleId = null;
+  showToast("Medium article saved!");
+}
+
+function deleteMediumArticle(id) {
+  if (!confirm("Delete this Medium article?")) return;
+  const store = getStore();
+  store.mediumArticles = store.mediumArticles.filter(x => x.id !== id);
+  saveStore(store);
+  renderAdminMediumArticles();
+  renderMediumArticles();
+}
+
+function saveMediumSettings() {
+  const profileUrl = document.getElementById("m-profile-url").value.trim();
+  const articlesUrl = document.getElementById("m-articles-url").value.trim();
+  if (profileUrl && !isSafeUrl(profileUrl)) { alert("Medium profile URL must be HTTPS."); return; }
+  if (articlesUrl && !isSafeUrl(articlesUrl)) { alert("Medium articles URL must be HTTPS."); return; }
+  const store = getStore();
+  if (!store.settings || typeof store.settings !== "object") store.settings = {};
+  store.settings.mediumProfileUrl = profileUrl;
+  store.settings.mediumArticlesUrl = articlesUrl;
+  saveStore(store);
+  applyArticleCtaLinks(store.settings || {});
+  showToast("Medium settings saved!");
 }
 
 // ══════════════════════════════════
@@ -2184,9 +2684,7 @@ function saveLinkedIn() {
   store.settings.linkedin = profileUrl;
   store.settings.articlesUrl = articlesUrl;
   saveStore(store);
-  // update "view all" button
-  const ctaBtn = document.querySelector(".articles-cta .btn-primary");
-  if (ctaBtn) ctaBtn.href = articlesUrl || profileUrl;
+  applyArticleCtaLinks(store.settings || {});
   showToast("LinkedIn settings saved!");
 }
 
@@ -2195,7 +2693,10 @@ function saveAllData() {
   saveStore(store);
   renderProjects();
   renderExperiences();
+  renderCredentials();
   renderArticles();
+  renderMediumArticles();
+  applyArticleCtaLinks(store.settings || {});
   showToast("All data saved! ✓");
 }
 
@@ -2206,7 +2707,7 @@ function updateAdminStats() {
   const sv = document.getElementById("stat-views");
   const sr = document.getElementById("stat-resume-requests");
   if (sp) sp.textContent = store.projects.length;
-  if (sa) sa.textContent = store.articles.length;
+  if (sa) sa.textContent = store.articles.length + store.mediumArticles.length;
   if (sv) sv.textContent = Number(localStorage.getItem(VISIT_COUNT_KEY) || "0");
   if (sr) sr.textContent = store.resumeRequests.length;
 }
@@ -2317,7 +2818,10 @@ window.addEventListener("DOMContentLoaded", () => {
   applyProfilePhoto(storedPhoto);
   renderProjects();
   renderExperiences();
+  renderCredentials();
   renderArticles();
+  renderMediumArticles();
+  applyArticleCtaLinks(store.settings || {});
 });
 </script>
 </body>
