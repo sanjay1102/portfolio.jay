@@ -1661,11 +1661,50 @@ function renderCredentials() {
     trainingsList.innerHTML = store.trainings.map(t => {
       const text = `${t.title} — ${t.provider} (${t.year})`;
       const doc = t.document && isSafeDocumentDataUrl(t.document.dataUrl)
-        ? ` <a href="${t.document.dataUrl}" target="_blank" rel="noopener" style="color:var(--neon-cyan);font-size:0.75rem;">View Document</a>`
+        ? ` <a href="#" onclick="openTrainingDocument(${Number(t.id)}); return false;" style="color:var(--neon-cyan);font-size:0.75rem;">View Document</a>`
         : "";
       return `<div class="training-item">${escapeHtml(text)}${doc}</div>`;
     }).join("") || `<div style="color:var(--text-muted);font-size:0.85rem;">No trainings yet.</div>`;
   }
+}
+
+function dataUrlToBlob(dataUrl) {
+  const parts = String(dataUrl || "").split(",");
+  if (parts.length !== 2) return null;
+  const header = parts[0];
+  const mimeMatch = header.match(/^data:([^;]+);base64$/i);
+  if (!mimeMatch) return null;
+  const mimeType = mimeMatch[1].toLowerCase();
+  const binary = atob(parts[1]);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mimeType });
+}
+
+function openTrainingDocument(trainingId) {
+  const store = getStore();
+  const item = store.trainings.find(x => x.id === trainingId);
+  const dataUrl = item && item.document && item.document.dataUrl;
+  if (!dataUrl || !isSafeDocumentDataUrl(dataUrl)) {
+    alert("Document not available.");
+    return;
+  }
+  const blob = dataUrlToBlob(dataUrl);
+  if (!blob) {
+    alert("Invalid document data.");
+    return;
+  }
+  const blobUrl = URL.createObjectURL(blob);
+  const popup = window.open(blobUrl, "_blank", "noopener,noreferrer");
+  if (!popup) {
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = (item.document && item.document.name) || "training-document";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
 }
 
 function renderArticles() {
