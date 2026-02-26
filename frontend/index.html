@@ -617,10 +617,10 @@ footer{
 <!-- HERO -->
 <section id="hero">
   <div class="hero-left">
-    <p class="hero-eyebrow"><span class="status-dot"></span>Available · Melbourne, AU</p>
+    <p class="hero-eyebrow"><span class="status-dot"></span><span id="hero-status-location">Available · Melbourne, AU</span></p>
     <h1 class="hero-name">Sanjay<br><span class="highlight">Sathiyanathan</span><span class="cursor"></span></h1>
-    <p class="hero-title"><strong>Desktop Support Engineer</strong> &nbsp;|&nbsp; IT Infrastructure Specialist</p>
-    <p class="hero-summary">IT professional with hands-on experience in Desktop Support, Microsoft 365, Azure AD, Intune, and ITSM workflows. Delivering enterprise-grade support across MSP environments while pursuing Certified Cyber Security Professional certification.</p>
+    <p class="hero-title"><strong id="hero-title-main">Desktop Support Engineer</strong> &nbsp;|&nbsp; IT Infrastructure Specialist</p>
+    <p class="hero-summary" id="hero-summary-text">IT professional with hands-on experience in Desktop Support, Microsoft 365, Azure AD, Intune, and ITSM workflows. Delivering enterprise-grade support across MSP environments while pursuing Certified Cyber Security Professional certification.</p>
     <div class="hero-cta">
       <a href="#experience" class="btn-primary">⚡ View Experience</a>
       <a href="#contact" class="btn-secondary">Get In Touch</a>
@@ -651,8 +651,8 @@ footer{
       <p>I hold a Bachelor of Information Technology from SLIIT and am currently completing my Certified Cyber Security Professional qualification at Lumify Learn. I'm passionate about building resilient IT systems and delivering exceptional end-user experiences.</p>
       <p>Outside of work, I actively engage with the Australian tech community, attending events like ACS Digital Pulse, and contribute to volunteering initiatives including Clean Up Australia Day and the Australian Tamil Chamber of Commerce.</p>
       <div class="about-info">
-        <div class="info-item"><div class="info-label">Location</div><div class="info-value">Melbourne, AU</div></div>
-        <div class="info-item"><div class="info-label">Status</div><div class="info-value" style="color:var(--neon-green)">Available</div></div>
+        <div class="info-item"><div class="info-label">Location</div><div class="info-value" id="about-location">Melbourne, AU</div></div>
+        <div class="info-item"><div class="info-label">Status</div><div class="info-value" id="about-status" style="color:var(--neon-green)">Available</div></div>
         <div class="info-item"><div class="info-label">Education</div><div class="info-value">B.IT – SLIIT</div></div>
         <div class="info-item"><div class="info-label">Contact</div><div class="info-value" style="font-size:0.78rem">Use contact form</div></div>
       </div>
@@ -1205,6 +1205,66 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
+function getStatusLabel(status) {
+  if (status === "open") return "Open to opportunities";
+  if (status === "unavailable") return "Not looking";
+  return "Available for hire";
+}
+
+function getStatusColor(status) {
+  if (status === "open") return "var(--neon-orange)";
+  if (status === "unavailable") return "#ff7070";
+  return "var(--neon-green)";
+}
+
+function applySettingsToProfile(settings) {
+  if (!settings || typeof settings !== "object") return;
+  const statusLabel = getStatusLabel(settings.status);
+  const location = sanitizeText(settings.location || "Melbourne, AU", 80);
+
+  const heroStatusLocation = document.getElementById("hero-status-location");
+  const heroTitleMain = document.getElementById("hero-title-main");
+  const heroSummaryText = document.getElementById("hero-summary-text");
+  const aboutLocation = document.getElementById("about-location");
+  const aboutStatus = document.getElementById("about-status");
+
+  if (heroStatusLocation) heroStatusLocation.textContent = `${statusLabel} · ${location}`;
+  if (heroTitleMain) heroTitleMain.textContent = sanitizeText(settings.title || "Desktop Support Engineer", 90);
+  if (heroSummaryText) heroSummaryText.textContent = sanitizeText(settings.summary || "", 500);
+  if (aboutLocation) aboutLocation.textContent = location;
+  if (aboutStatus) {
+    aboutStatus.textContent = statusLabel;
+    aboutStatus.style.color = getStatusColor(settings.status);
+  }
+}
+
+function populateSettingsForm(settings) {
+  if (!settings || typeof settings !== "object") return;
+  const setVal = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.value = value || "";
+  };
+
+  setVal("s-name", settings.name || "");
+  setVal("s-title", settings.title || "");
+  setVal("s-email", settings.email || "");
+  setVal("s-phone", settings.phone || "");
+  setVal("s-location", settings.location || "");
+  setVal("s-linkedin", settings.linkedin || "");
+  setVal("s-summary", settings.summary || "");
+  setVal("s-default-sender-email", settings.defaultSenderEmail || settings.email || "");
+  setVal("s-resume-url", settings.resumeFileUrl || "");
+  setVal("s-resume-auto-send", settings.resumeAutoSend || "disabled");
+  setVal("s-backend-url", settings.resumeBackendUrl || "");
+  setVal("s-backend-api-key", settings.resumeBackendApiKey || "");
+  setVal("s-emailjs-public-key", settings.emailjsPublicKey || "");
+  setVal("s-emailjs-service-id", settings.emailjsServiceId || "");
+  setVal("s-emailjs-template-id", settings.emailjsTemplateId || "");
+  setVal("li-profile-url", settings.linkedin || "");
+  setVal("li-articles-url", settings.articlesUrl || "");
+  setVal("s-status", settings.status || "available");
+}
+
 function clearLoginProtectionState() {
   localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
   localStorage.removeItem(LOGIN_LOCK_UNTIL_KEY);
@@ -1500,6 +1560,8 @@ function doLogin() {
     const store = getStore();
     const previewSrc = (store.settings && store.settings.photo) || DEFAULT_HERO_PHOTO;
     applyProfilePhoto(previewSrc);
+    populateSettingsForm(store.settings || {});
+    applySettingsToProfile(store.settings || {});
     const photoInput = document.getElementById("s-photo");
     if (photoInput) photoInput.value = "";
     renderAdminProjects();
@@ -2128,6 +2190,8 @@ function saveSettings() {
     emailjsTemplateId
   };
   saveStore(store);
+  applySettingsToProfile(store.settings);
+  populateSettingsForm(store.settings);
   showToast(wantsPasswordChange ? "Settings + password updated!" : "Settings saved!");
 }
 
@@ -2268,24 +2332,8 @@ window.addEventListener("DOMContentLoaded", () => {
   trackSiteView();
   const store = getStore();
   const storedPhoto = (store.settings && store.settings.photo) || DEFAULT_HERO_PHOTO;
-  if (store.settings) {
-    const senderInput = document.getElementById("s-default-sender-email");
-    const resumeUrlInput = document.getElementById("s-resume-url");
-    const autoSendInput = document.getElementById("s-resume-auto-send");
-    const backendUrlInput = document.getElementById("s-backend-url");
-    const backendKeyInput = document.getElementById("s-backend-api-key");
-    const publicKeyInput = document.getElementById("s-emailjs-public-key");
-    const serviceIdInput = document.getElementById("s-emailjs-service-id");
-    const templateIdInput = document.getElementById("s-emailjs-template-id");
-    if (senderInput) senderInput.value = store.settings.defaultSenderEmail || store.settings.email || "";
-    if (resumeUrlInput) resumeUrlInput.value = store.settings.resumeFileUrl || "";
-    if (autoSendInput) autoSendInput.value = store.settings.resumeAutoSend || "disabled";
-    if (backendUrlInput) backendUrlInput.value = store.settings.resumeBackendUrl || "";
-    if (backendKeyInput) backendKeyInput.value = store.settings.resumeBackendApiKey || "";
-    if (publicKeyInput) publicKeyInput.value = store.settings.emailjsPublicKey || "";
-    if (serviceIdInput) serviceIdInput.value = store.settings.emailjsServiceId || "";
-    if (templateIdInput) templateIdInput.value = store.settings.emailjsTemplateId || "";
-  }
+  populateSettingsForm(store.settings || {});
+  applySettingsToProfile(store.settings || {});
   applyProfilePhoto(storedPhoto);
   renderProjects();
   renderExperiences();
