@@ -721,61 +721,7 @@ footer{
 <section id="experience">
   <p class="section-label">// 03. career_log</p>
   <h2 class="section-title fade-in">Experience</h2>
-  <div class="timeline">
-    <div class="tl-item"><div class="tl-dot current"></div>
-      <div class="tl-period">Jun 2025 — Present</div>
-      <div class="tl-role">Desktop Support Engineer</div>
-      <div class="tl-company">Cost Logic Pvt Ltd · Melbourne, AU</div>
-      <ul class="tl-pts">
-        <li>Deliver high-quality desktop and end-user support in fast-paced MSP environments ensuring SLA compliance.</li>
-        <li>Perform IT onboarding including hardware setup, user account provisioning, and environment familiarisation.</li>
-        <li>Administer Active Directory, Azure AD (Entra ID), Microsoft 365, and Intune across multi-client environments.</li>
-        <li>Log, track, and resolve incidents via ITSM tools covering printers, file shares, NTFS permissions, and DNS.</li>
-        <li>Monitor infrastructure health and proactively resolve platform issues.</li>
-      </ul>
-    </div>
-    <div class="tl-item"><div class="tl-dot"></div>
-      <div class="tl-period">May 2025 — Jul 2025</div>
-      <div class="tl-role">Freelance IT Network Engineer</div>
-      <div class="tl-company">TechDomain · Melbourne, AU</div>
-      <ul class="tl-pts">
-        <li>Troubleshot LAN connectivity and network issues to ensure stable operations.</li>
-        <li>Configured and maintained Linux and Windows servers including Active Directory management.</li>
-        <li>Provided Office 365 and hardware/printer support across multiple client sites.</li>
-      </ul>
-    </div>
-    <div class="tl-item"><div class="tl-dot"></div>
-      <div class="tl-period">Dec 2022 — Oct 2024</div>
-      <div class="tl-role">IT System Support Engineer</div>
-      <div class="tl-company">SLTMOBITEL · Colombo, Sri Lanka</div>
-      <ul class="tl-pts">
-        <li>Delivered L1/L2/L3 support maintaining 99.9% service uptime in client-facing environment.</li>
-        <li>Deployed Zabbix, Nagios, and Kibana monitoring tools, reducing downtime by 60%.</li>
-        <li>Automated health checks and alerting via Python and Shell scripts for early detection.</li>
-        <li>Managed VMware/Hyper-V virtualisation and performed Azure and AWS cloud operations.</li>
-        <li>Conducted API testing and SQL database validation using Postman for back-end integrity.</li>
-      </ul>
-    </div>
-    <div class="tl-item"><div class="tl-dot"></div>
-      <div class="tl-period">Jul 2020 — Jun 2022</div>
-      <div class="tl-role">IT Support Executive</div>
-      <div class="tl-company">NEOTECHDESIGN · US, Remote</div>
-      <ul class="tl-pts">
-        <li>Delivered L1/L2 application support for web-based platforms ensuring high availability for global users.</li>
-        <li>Led incident resolution and health monitoring using Freshservice ITSM, improving SLA adherence.</li>
-        <li>Managed user account provisioning, security audits, and knowledge base creation.</li>
-      </ul>
-    </div>
-    <div class="tl-item"><div class="tl-dot"></div>
-      <div class="tl-period">Jul 2018 — Nov 2018</div>
-      <div class="tl-role">Customer Care Representative</div>
-      <div class="tl-company">Dialog Axiata · Colombo, Sri Lanka</div>
-      <ul class="tl-pts">
-        <li>Handled 100+ technical issues daily achieving a 90% first-call resolution rate.</li>
-        <li>Maintained 80% customer satisfaction rating through effective problem-solving.</li>
-      </ul>
-    </div>
-  </div>
+  <div class="timeline" id="experience-timeline"></div>
 </section>
 
 <div class="section-divider"></div>
@@ -958,6 +904,7 @@ footer{
       <!-- TABS -->
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchTab('projects',this)">📁 Projects</button>
+        <button class="admin-tab" onclick="switchTab('experience',this)">💼 Experience</button>
         <button class="admin-tab" onclick="switchTab('articles',this)">📝 Articles</button>
         <button class="admin-tab" onclick="switchTab('resume',this)">📄 Resume Requests</button>
         <button class="admin-tab" onclick="switchTab('linkedin',this)">🔗 LinkedIn</button>
@@ -991,6 +938,36 @@ footer{
           <div style="display:flex;gap:10px;margin-top:8px;">
             <button class="admin-btn primary" onclick="saveProject()">💾 SAVE PROJECT</button>
             <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('project-form').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: EXPERIENCE -->
+      <div class="admin-section" id="tab-experience">
+        <div class="admin-notice"><strong>Experience Manager</strong> — Add, edit, or remove career timeline entries. Put one responsibility per line.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="font-family:Orbitron,monospace;font-size:0.9rem;color:var(--text-primary);">Current Experience</h3>
+          <button class="admin-btn primary" onclick="showAddExperience()">+ ADD EXPERIENCE</button>
+        </div>
+        <div class="items-list" id="admin-experience-list"></div>
+        <hr class="admin-divider"/>
+        <div id="experience-form" style="display:none;">
+          <h3 style="font-family:Orbitron,monospace;font-size:0.85rem;color:var(--neon-cyan);margin-bottom:16px;" id="exp-form-title">ADD EXPERIENCE</h3>
+          <div class="admin-grid">
+            <div class="admin-field"><label class="admin-label">Period</label><input class="admin-input" id="ef-period" placeholder="e.g. Jun 2025 — Present"/></div>
+            <div class="admin-field"><label class="admin-label">Role</label><input class="admin-input" id="ef-role" placeholder="e.g. Desktop Support Engineer"/></div>
+            <div class="admin-field full-col"><label class="admin-label">Company</label><input class="admin-input" id="ef-company" placeholder="e.g. Cost Logic Pvt Ltd · Melbourne, AU"/></div>
+            <div class="admin-field"><label class="admin-label">Current Role Dot</label>
+              <select class="admin-select" id="ef-current">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div class="admin-field full-col"><label class="admin-label">Responsibilities (one per line)</label><textarea class="admin-textarea" id="ef-points" placeholder="Deliver desktop support&#10;Manage Microsoft 365&#10;Resolve incidents via ITSM"></textarea></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <button class="admin-btn primary" onclick="saveExperience()">💾 SAVE EXPERIENCE</button>
+            <button class="admin-btn" style="border-color:var(--dark-border);color:var(--text-muted);" onclick="document.getElementById('experience-form').style.display='none'">Cancel</button>
           </div>
         </div>
       </div>
@@ -1176,6 +1153,7 @@ function getStore() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORE_KEY)) || getDefaultStore();
     if (!Array.isArray(parsed.projects)) parsed.projects = [];
+    if (!Array.isArray(parsed.experiences)) parsed.experiences = getDefaultExperiences();
     if (!Array.isArray(parsed.articles)) parsed.articles = [];
     if (!Array.isArray(parsed.resumeRequests)) parsed.resumeRequests = [];
     if (!parsed.settings || typeof parsed.settings !== "object") parsed.settings = {};
@@ -1297,6 +1275,74 @@ function resetProfilePhoto() {
   showToast("Profile photo reset.");
 }
 
+function getDefaultExperiences() {
+  return [
+    {
+      id: 1,
+      period: "Jun 2025 — Present",
+      role: "Desktop Support Engineer",
+      company: "Cost Logic Pvt Ltd · Melbourne, AU",
+      current: true,
+      points: [
+        "Deliver high-quality desktop and end-user support in fast-paced MSP environments ensuring SLA compliance.",
+        "Perform IT onboarding including hardware setup, user account provisioning, and environment familiarisation.",
+        "Administer Active Directory, Azure AD (Entra ID), Microsoft 365, and Intune across multi-client environments.",
+        "Log, track, and resolve incidents via ITSM tools covering printers, file shares, NTFS permissions, and DNS.",
+        "Monitor infrastructure health and proactively resolve platform issues."
+      ]
+    },
+    {
+      id: 2,
+      period: "May 2025 — Jul 2025",
+      role: "Freelance IT Network Engineer",
+      company: "TechDomain · Melbourne, AU",
+      current: false,
+      points: [
+        "Troubleshot LAN connectivity and network issues to ensure stable operations.",
+        "Configured and maintained Linux and Windows servers including Active Directory management.",
+        "Provided Office 365 and hardware/printer support across multiple client sites."
+      ]
+    },
+    {
+      id: 3,
+      period: "Dec 2022 — Oct 2024",
+      role: "IT System Support Engineer",
+      company: "SLTMOBITEL · Colombo, Sri Lanka",
+      current: false,
+      points: [
+        "Delivered L1/L2/L3 support maintaining 99.9% service uptime in client-facing environment.",
+        "Deployed Zabbix, Nagios, and Kibana monitoring tools, reducing downtime by 60%.",
+        "Automated health checks and alerting via Python and Shell scripts for early detection.",
+        "Managed VMware/Hyper-V virtualisation and performed Azure and AWS cloud operations.",
+        "Conducted API testing and SQL database validation using Postman for back-end integrity."
+      ]
+    },
+    {
+      id: 4,
+      period: "Jul 2020 — Jun 2022",
+      role: "IT Support Executive",
+      company: "NEOTECHDESIGN · US, Remote",
+      current: false,
+      points: [
+        "Delivered L1/L2 application support for web-based platforms ensuring high availability for global users.",
+        "Led incident resolution and health monitoring using Freshservice ITSM, improving SLA adherence.",
+        "Managed user account provisioning, security audits, and knowledge base creation."
+      ]
+    },
+    {
+      id: 5,
+      period: "Jul 2018 — Nov 2018",
+      role: "Customer Care Representative",
+      company: "Dialog Axiata · Colombo, Sri Lanka",
+      current: false,
+      points: [
+        "Handled 100+ technical issues daily achieving a 90% first-call resolution rate.",
+        "Maintained 80% customer satisfaction rating through effective problem-solving."
+      ]
+    }
+  ];
+}
+
 function getDefaultStore() {
   return {
     projects: [
@@ -1305,6 +1351,7 @@ function getDefaultStore() {
       { id:3, title:"Home Lab — Cybersecurity Practice", status:"wip", desc:"Building a personal home lab environment to practice cybersecurity concepts, penetration testing, and SOC analyst workflows using virtualised network environments.", tools:"Kali Linux,VirtualBox,Wireshark,Metasploit,pfSense" },
       { id:4, title:"Azure Cloud Migration Lab", status:"plan", desc:"Planned project to design and execute a simulated on-premises to Azure cloud migration, documenting the architecture, cost optimisation, and deployment pipeline.", tools:"Azure,Terraform,PowerShell,ARM Templates,Azure AD" }
     ],
+    experiences: getDefaultExperiences(),
     articles: [
       { id:1, title:"Getting Started with Azure AD & Intune for Modern Device Management", url:"https://www.linkedin.com/in/sanjay-sathiyanathan/", tag:"IT Support", year:"2025", excerpt:"A practical guide to setting up Azure Active Directory and Microsoft Intune for device enrolment and policy management in enterprise environments..." },
       { id:2, title:"How I Reduced Infrastructure Downtime by 60% with Zabbix & Nagios", url:"https://www.linkedin.com/in/sanjay-sathiyanathan/", tag:"Monitoring", year:"2024", excerpt:"Real-world experience deploying infrastructure monitoring tools in a telco environment — what worked, what didn't, and key lessons learned..." },
@@ -1353,6 +1400,22 @@ function renderProjects() {
       <div class="proj-tools">${tools}</div>
     </div>`;
   }).join("");
+}
+
+function renderExperiences() {
+  const store = getStore();
+  const timeline = document.getElementById("experience-timeline");
+  if (!timeline) return;
+  timeline.innerHTML = store.experiences.map((e) => {
+    const points = (Array.isArray(e.points) ? e.points : []).map((p) => `<li>${escapeHtml(p)}</li>`).join("");
+    return `
+    <div class="tl-item on"><div class="tl-dot ${e.current ? "current" : ""}"></div>
+      <div class="tl-period">${escapeHtml(e.period || "")}</div>
+      <div class="tl-role">${escapeHtml(e.role || "")}</div>
+      <div class="tl-company">${escapeHtml(e.company || "")}</div>
+      <ul class="tl-pts">${points}</ul>
+    </div>`;
+  }).join("") || "<div style=\"color:var(--text-muted);font-size:0.9rem;\">No experience entries yet.</div>";
 }
 
 function renderArticles() {
@@ -1440,6 +1503,7 @@ function doLogin() {
     const photoInput = document.getElementById("s-photo");
     if (photoInput) photoInput.value = "";
     renderAdminProjects();
+    renderAdminExperiences();
     renderAdminArticles();
     renderAdminResumeRequests();
     updateAdminStats();
@@ -1555,6 +1619,103 @@ function deleteProject(id) {
   saveStore(store);
   renderAdminProjects();
   renderProjects();
+}
+
+// ══════════════════════════════════
+// ADMIN — EXPERIENCE
+// ══════════════════════════════════
+let editingExperienceId = null;
+
+function renderAdminExperiences() {
+  const store = getStore();
+  const list = document.getElementById("admin-experience-list");
+  if (!list) return;
+  list.innerHTML = store.experiences.map(e => {
+    const pointsCount = Array.isArray(e.points) ? e.points.length : 0;
+    return `
+    <div class="item-row">
+      <div class="item-row-info">
+        <div class="item-row-title">${escapeHtml(e.role)} · ${escapeHtml(e.company)}</div>
+        <div class="item-row-meta">${escapeHtml(e.period)} &nbsp;·&nbsp; ${pointsCount} points${e.current ? " &nbsp;·&nbsp; <span class=\"status-badge badge-done\">Current</span>" : ""}</div>
+      </div>
+      <div class="item-row-actions">
+        <button class="admin-btn" style="padding:6px 14px;font-size:0.62rem;border-color:var(--neon-cyan);color:var(--neon-cyan);" onclick="editExperience(${e.id})">✏ Edit</button>
+        <button class="admin-btn danger" style="padding:6px 14px;font-size:0.62rem;" onclick="deleteExperience(${e.id})">✕ Del</button>
+      </div>
+    </div>`;
+  }).join("") || "<div style=\"color:var(--text-muted);font-size:0.82rem;padding:14px;\">No experience entries yet. Add your first experience above.</div>";
+}
+
+function showAddExperience() {
+  editingExperienceId = null;
+  document.getElementById("exp-form-title").textContent = "ADD EXPERIENCE";
+  document.getElementById("ef-period").value = "";
+  document.getElementById("ef-role").value = "";
+  document.getElementById("ef-company").value = "";
+  document.getElementById("ef-current").value = "no";
+  document.getElementById("ef-points").value = "";
+  document.getElementById("experience-form").style.display = "block";
+  document.getElementById("experience-form").scrollIntoView({behavior:"smooth"});
+}
+
+function editExperience(id) {
+  const store = getStore();
+  const e = store.experiences.find(x => x.id === id);
+  if (!e) return;
+  editingExperienceId = id;
+  document.getElementById("exp-form-title").textContent = "EDIT EXPERIENCE";
+  document.getElementById("ef-period").value = e.period || "";
+  document.getElementById("ef-role").value = e.role || "";
+  document.getElementById("ef-company").value = e.company || "";
+  document.getElementById("ef-current").value = e.current ? "yes" : "no";
+  document.getElementById("ef-points").value = (Array.isArray(e.points) ? e.points : []).join("\n");
+  document.getElementById("experience-form").style.display = "block";
+  document.getElementById("experience-form").scrollIntoView({behavior:"smooth"});
+}
+
+function saveExperience() {
+  const period = sanitizeText(document.getElementById("ef-period").value, 80);
+  const role = sanitizeText(document.getElementById("ef-role").value, 120);
+  const company = sanitizeText(document.getElementById("ef-company").value, 120);
+  const current = document.getElementById("ef-current").value === "yes";
+  const points = String(document.getElementById("ef-points").value || "")
+    .split("\n")
+    .map(p => sanitizeText(p, 220))
+    .filter(Boolean)
+    .slice(0, 12);
+
+  if (!period || !role || !company) { alert("Period, role, and company are required."); return; }
+  if (points.length === 0) { alert("Add at least one responsibility line."); return; }
+
+  const store = getStore();
+  const item = { id: editingExperienceId || Date.now(), period, role, company, current, points };
+  if (editingExperienceId) {
+    const idx = store.experiences.findIndex(x => x.id === editingExperienceId);
+    if (idx > -1) store.experiences[idx] = item;
+  } else {
+    store.experiences.unshift(item);
+  }
+  if (current) {
+    store.experiences = store.experiences.map(x => ({ ...x, current: x.id === item.id }));
+  }
+  saveStore(store);
+  renderAdminExperiences();
+  renderExperiences();
+  document.getElementById("experience-form").style.display = "none";
+  editingExperienceId = null;
+  showToast("Experience saved!");
+}
+
+function deleteExperience(id) {
+  if (!confirm("Delete this experience entry?")) return;
+  const store = getStore();
+  store.experiences = store.experiences.filter(x => x.id !== id);
+  if (!store.experiences.some(x => x.current) && store.experiences[0]) {
+    store.experiences[0].current = true;
+  }
+  saveStore(store);
+  renderAdminExperiences();
+  renderExperiences();
 }
 
 // ══════════════════════════════════
@@ -1989,6 +2150,7 @@ function saveAllData() {
   const store = getStore();
   saveStore(store);
   renderProjects();
+  renderExperiences();
   renderArticles();
   showToast("All data saved! ✓");
 }
@@ -2126,6 +2288,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   applyProfilePhoto(storedPhoto);
   renderProjects();
+  renderExperiences();
   renderArticles();
 });
 </script>
