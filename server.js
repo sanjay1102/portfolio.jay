@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -12,11 +13,12 @@ dotenv.config();
 const app = express();
 
 const PORT = Number(process.env.PORT || 8787);
-const AUTOSEND_API_KEY = String(process.env.AUTOSEND_API_KEY || "").trim();
 const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map(v => v.trim())
   .filter(Boolean);
+const NODE_ENV = String(process.env.NODE_ENV || "development").trim().toLowerCase();
+const IS_PROD = NODE_ENV === "production";
 
 const SMTP_HOST = String(process.env.SMTP_HOST || "").trim();
 const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
@@ -28,23 +30,104 @@ const BREVO_API_KEY = String(process.env.BREVO_API_KEY || "").trim();
 const FROM_NAME = String(process.env.FROM_NAME || "Portfolio").trim();
 const FROM_EMAIL = String(process.env.FROM_EMAIL || SMTP_USER).trim();
 const RESUME_FILE_PATH = String(process.env.RESUME_FILE_PATH || "").trim();
+const SESSION_SECRET = String(process.env.SESSION_SECRET || "").trim();
+const ADMIN_PASSWORD_HASH = String(process.env.ADMIN_PASSWORD_HASH || "").trim();
+const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || "").trim();
+const SESSION_COOKIE_NAME = "admin_session";
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 
 function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
 }
 
-function requireApiKey(req, res, next) {
-  if (!AUTOSEND_API_KEY) {
-    return res.status(500).json({ error: "Server not configured: missing AUTOSEND_API_KEY" });
+function parseCookies(req) {
+  const raw = String(req.headers.cookie || "");
+  const out = {};
+  raw.split(";").forEach(part => {
+    const idx = part.indexOf("=");
+    if (idx < 0) return;
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    if (!key) return;
+    out[key] = decodeURIComponent(val);
+  });
+  return out;
+}
+
+function signTokenPart(value) {
+  return crypto.createHmac("sha256", SESSION_SECRET).update(value).digest("base64url");
+}
+
+function createSessionToken() {
+  const payload = {
+    exp: Date.now() + SESSION_TTL_MS,
+    typ: "admin"
+  };
+  const payloadPart = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const sig = signTokenPart(payloadPart);
+  return `${payloadPart}.${sig}`;
+}
+
+function verifySessionToken(token) {
+  if (!token || !token.includes(".")) return false;
+  const [payloadPart, providedSig] = token.split(".");
+  if (!payloadPart || !providedSig) return false;
+  const expectedSig = signTokenPart(payloadPart);
+  const a = Buffer.from(providedSig);
+  const b = Buffer.from(expectedSig);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
+  try {
+    const payload = JSON.parse(Buffer.from(payloadPart, "base64url").toString("utf8"));
+    if (!payload || payload.typ !== "admin") return false;
+    if (typeof payload.exp !== "number" || Date.now() > payload.exp) return false;
+    return true;
+  } catch {
+    return false;
   }
-  const provided = String(req.header("x-api-key") || "").trim();
-  if (!provided || provided !== AUTOSEND_API_KEY) {
+}
+
+function verifyPassword(password) {
+  const candidate = String(password || "");
+  if (!candidate) return false;
+
+  if (ADMIN_PASSWORD_HASH.startsWith("scrypt$")) {
+    const parts = ADMIN_PASSWORD_HASH.split("$");
+    if (parts.length !== 3) return false;
+    const salt = Buffer.from(parts[1], "base64");
+    const expected = Buffer.from(parts[2], "base64");
+    const derived = crypto.scryptSync(candidate, salt, expected.length);
+    return crypto.timingSafeEqual(expected, derived);
+  }
+
+  if (ADMIN_PASSWORD) {
+    const expected = Buffer.from(ADMIN_PASSWORD);
+    const received = Buffer.from(candidate);
+    if (expected.length !== received.length) return false;
+    return crypto.timingSafeEqual(expected, received);
+  }
+
+  return false;
+}
+
+function requireAdminAuth(req, res, next) {
+  if (!SESSION_SECRET) {
+    return res.status(500).json({ error: "Server not configured: missing SESSION_SECRET" });
+  }
+  const cookies = parseCookies(req);
+  const token = cookies[SESSION_COOKIE_NAME];
+  if (!verifySessionToken(token)) {
     return res.status(401).json({ error: "Unauthorized" });
   }
   next();
 }
 
 function validateServerConfig() {
+  if (!SESSION_SECRET) {
+    throw new Error("Missing SESSION_SECRET.");
+  }
+  if (!ADMIN_PASSWORD_HASH && !ADMIN_PASSWORD) {
+    throw new Error("Missing admin password config. Set ADMIN_PASSWORD_HASH (recommended) or ADMIN_PASSWORD.");
+  }
   if (EMAIL_PROVIDER === "smtp" && (!SMTP_HOST || !SMTP_USER || !SMTP_PASS)) {
     throw new Error("Missing SMTP configuration. Check SMTP_HOST, SMTP_USER, SMTP_PASS.");
   }
@@ -87,7 +170,8 @@ app.use(cors({
       return callback(null, true);
     }
     return callback(new Error("Blocked by CORS"));
-  }
+  },
+  credentials: true
 }));
 
 const limiter = rateLimit({
@@ -98,11 +182,48 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 app.get("/health", (_req, res) => {
   res.json({ ok: true, ts: new Date().toISOString() });
 });
 
-app.post("/api/send-resume", requireApiKey, async (req, res) => {
+app.post("/api/admin/login", loginLimiter, (req, res) => {
+  const password = String(req.body?.password || "");
+  if (!verifyPassword(password)) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+  const token = createSessionToken();
+  res.cookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? "none" : "lax",
+    maxAge: SESSION_TTL_MS,
+    path: "/"
+  });
+  return res.json({ ok: true });
+});
+
+app.post("/api/admin/logout", (_req, res) => {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    secure: IS_PROD,
+    sameSite: IS_PROD ? "none" : "lax",
+    path: "/"
+  });
+  return res.json({ ok: true });
+});
+
+app.get("/api/admin/me", requireAdminAuth, (_req, res) => {
+  return res.json({ ok: true, authenticated: true });
+});
+
+app.post("/api/send-resume", requireAdminAuth, async (req, res) => {
   try {
     const toEmail = String(req.body?.toEmail || "").trim().toLowerCase();
     const toName = String(req.body?.toName || "").trim().slice(0, 120) || "there";

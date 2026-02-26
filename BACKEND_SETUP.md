@@ -17,7 +17,8 @@ cp .env.example .env
 
 Required:
 
-- `AUTOSEND_API_KEY`: long random secret (at least 32 chars)
+- `SESSION_SECRET`: long random secret (at least 32 chars)
+- `ADMIN_PASSWORD_HASH` (recommended) or `ADMIN_PASSWORD`
 - `ALLOWED_ORIGINS`: your frontend domain(s)
 - `RESUME_FILE_PATH`: absolute path to your private PDF on the server
 - `FROM_NAME` / `FROM_EMAIL`
@@ -29,6 +30,12 @@ Mail provider modes:
 
 2. `EMAIL_PROVIDER=brevo` (recommended on Render free):
 - Set `BREVO_API_KEY`
+
+Generate a secure admin hash (Node one-liner):
+
+```bash
+node -e "const c=require('crypto');const p=process.argv[1];const s=c.randomBytes(16);const h=c.scryptSync(p,s,64);console.log('scrypt$'+s.toString('base64')+'$'+h.toString('base64'))" "your-admin-password"
+```
 
 ## 3. Run backend
 
@@ -48,10 +55,9 @@ In your site Admin -> Settings:
 
 - `Auto Send Resume` = `Enabled via secure backend API`
 - `Backend API URL` = `https://your-backend-domain.com` (or `http://localhost:8787` in local dev)
-- `Backend API Key` = same value as `AUTOSEND_API_KEY`
 - `Default Sender Email` = your sender mailbox
 
-Save settings, then approve a resume request.
+Then log in with your backend admin password and approve a resume request.
 
 ## Render-specific notes
 
@@ -67,6 +73,6 @@ RESUME_FILE_PATH=/opt/render/project/src/private/SanjayNathan_Resumee.pdf
 
 ## Security notes
 
-- API is protected by `x-api-key`, CORS allowlist, rate limiting, and helmet.
+- API is protected by backend admin session cookies, CORS allowlist, rate limiting, and helmet.
 - Do not commit `.env`.
-- Rotate `AUTOSEND_API_KEY` if exposed.
+- Rotate `SESSION_SECRET` if exposed.

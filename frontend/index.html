@@ -1058,13 +1058,9 @@ footer{
             </select>
           </div>
           <div class="admin-field"><label class="admin-label">Backend API URL</label><input class="admin-input" id="s-backend-url" placeholder="https://your-backend.example.com"/></div>
-          <div class="admin-field"><label class="admin-label">Backend API Key</label><input class="admin-input" id="s-backend-api-key" type="password" placeholder="optional x-api-key"/></div>
           <div class="admin-field"><label class="admin-label">EmailJS Public Key</label><input class="admin-input" id="s-emailjs-public-key" placeholder="e.g. QWERTY123abc"/></div>
           <div class="admin-field"><label class="admin-label">EmailJS Service ID</label><input class="admin-input" id="s-emailjs-service-id" placeholder="e.g. service_abcd123"/></div>
           <div class="admin-field"><label class="admin-label">EmailJS Template ID</label><input class="admin-input" id="s-emailjs-template-id" placeholder="e.g. template_xyz789"/></div>
-          <div class="admin-field"><label class="admin-label">Current Admin Password</label><input class="admin-input" type="password" id="s-current-pwd" placeholder="Required to change password"/></div>
-          <div class="admin-field"><label class="admin-label">New Admin Password</label><input class="admin-input" type="password" id="s-new-pwd" placeholder="Min 10 chars with upper/lower/number/symbol"/></div>
-          <div class="admin-field"><label class="admin-label">Confirm New Password</label><input class="admin-input" type="password" id="s-confirm-pwd" placeholder="Re-enter new password"/></div>
           <div class="admin-field"><label class="admin-label">Availability Status</label>
             <select class="admin-select" id="s-status">
               <option value="available">🟢 Available for hire</option>
@@ -1139,7 +1135,6 @@ footer{
 // DATA STORE — localStorage
 // ══════════════════════════════════
 const STORE_KEY = "ss_portfolio_v1";
-const ADMIN_PWD_KEY = "ss_admin_pwd";
 const DEFAULT_HERO_PHOTO = (document.getElementById("hero-photo") || {}).src || "";
 const LOGIN_ATTEMPTS_KEY = "ss_admin_login_attempts";
 const LOGIN_LOCK_UNTIL_KEY = "ss_admin_login_lock_until";
@@ -1163,10 +1158,6 @@ function getStore() {
 
 function saveStore(data) {
   localStorage.setItem(STORE_KEY, JSON.stringify(data));
-}
-
-function getAdminPwd() {
-  return localStorage.getItem(ADMIN_PWD_KEY) || "sanjay2025";
 }
 
 function escapeHtml(value) {
@@ -1256,7 +1247,6 @@ function populateSettingsForm(settings) {
   setVal("s-resume-url", settings.resumeFileUrl || "");
   setVal("s-resume-auto-send", settings.resumeAutoSend || "disabled");
   setVal("s-backend-url", settings.resumeBackendUrl || "");
-  setVal("s-backend-api-key", settings.resumeBackendApiKey || "");
   setVal("s-emailjs-public-key", settings.emailjsPublicKey || "");
   setVal("s-emailjs-service-id", settings.emailjsServiceId || "");
   setVal("s-emailjs-template-id", settings.emailjsTemplateId || "");
@@ -1431,7 +1421,6 @@ function getDefaultStore() {
       resumeAutoSend:"disabled",
       resumeFileUrl:"",
       resumeBackendUrl:"",
-      resumeBackendApiKey:"",
       emailjsPublicKey:"",
       emailjsServiceId:"",
       emailjsTemplateId:""
@@ -1539,10 +1528,12 @@ function logoutAdmin() {
   document.getElementById("admin-login-screen").style.display = "block";
   document.getElementById("admin-pwd").value = "";
   document.getElementById("admin-error").style.display = "none";
+  const endpoint = getBackendBaseUrl((getStore().settings || {})) + "/api/admin/logout";
+  fetch(endpoint, { method: "POST", credentials: "include" }).catch(() => {});
   showToast("Logged out.");
 }
 
-function doLogin() {
+async function doLogin() {
   const lockState = getLockState();
   if (lockState.locked) {
     const secs = Math.ceil(lockState.remainingMs / 1000);
@@ -1551,8 +1542,9 @@ function doLogin() {
     return;
   }
 
-  const pwd = document.getElementById("admin-pwd").value;
-  if (pwd === getAdminPwd()) {
+  const pwd = document.getElementById("admin-pwd").value.trim();
+  try {
+    await backendLogin(pwd);
     clearLoginProtectionState();
     adminLoggedIn = true;
     document.getElementById("admin-login-screen").style.display = "none";
@@ -1570,11 +1562,11 @@ function doLogin() {
     renderAdminResumeRequests();
     updateAdminStats();
     resetAdminIdleTimer();
-  } else {
+  } catch (_e) {
     const failState = registerFailedLogin();
     document.getElementById("admin-error").textContent = failState.locked
-      ? "Too many failed attempts. Login locked for 5 minutes."
-      : `Incorrect password (${MAX_LOGIN_ATTEMPTS - failState.attempts} attempts left).`;
+      ? "Too many failed attempts. Please try again later."
+      : `Login failed (${MAX_LOGIN_ATTEMPTS - failState.attempts} attempts left).`;
     document.getElementById("admin-error").style.display = "block";
     document.getElementById("admin-pwd").style.borderColor = "#ff5050";
     setTimeout(()=>document.getElementById("admin-pwd").style.borderColor="",1500);
@@ -1958,6 +1950,11 @@ function isSafeBackendUrl(value) {
   }
 }
 
+function getBackendBaseUrl(settings) {
+  const configured = normalizeBackendBaseUrl(settings);
+  return configured || window.location.origin;
+}
+
 function normalizeBackendBaseUrl(settings) {
   const raw = sanitizeText((settings && settings.resumeBackendUrl) || "", 300);
   if (!raw) return "";
@@ -1965,14 +1962,12 @@ function normalizeBackendBaseUrl(settings) {
 }
 
 async function sendResumeWithBackend(req, settings) {
-  const baseUrl = normalizeBackendBaseUrl(settings);
-  const endpoint = (baseUrl || window.location.origin) + "/api/send-resume";
+  const endpoint = getBackendBaseUrl(settings) + "/api/send-resume";
   const headers = { "Content-Type": "application/json" };
-  const apiKey = sanitizeText((settings && settings.resumeBackendApiKey) || "", 240);
-  if (apiKey) headers["x-api-key"] = apiKey;
   const res = await fetch(endpoint, {
     method: "POST",
     headers,
+    credentials: "include",
     body: JSON.stringify({
       toEmail: req.email,
       toName: req.name
@@ -2099,6 +2094,21 @@ function trackSiteView() {
 // ══════════════════════════════════
 // ADMIN — SETTINGS & LINKEDIN
 // ══════════════════════════════════
+async function backendLogin(password) {
+  const store = getStore();
+  const endpoint = getBackendBaseUrl(store.settings || {}) + "/api/admin/login";
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ password })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "Login failed");
+  }
+}
+
 function saveSettings() {
   const store = getStore();
   const linkedin = document.getElementById("s-linkedin").value.trim();
@@ -2106,7 +2116,6 @@ function saveSettings() {
   const defaultSenderEmail = sanitizeText(document.getElementById("s-default-sender-email").value, 120).toLowerCase();
   const resumeAutoSend = document.getElementById("s-resume-auto-send").value;
   const resumeBackendUrl = document.getElementById("s-backend-url").value.trim();
-  const resumeBackendApiKey = sanitizeText(document.getElementById("s-backend-api-key").value, 240);
   const emailjsPublicKey = sanitizeText(document.getElementById("s-emailjs-public-key").value, 120);
   const emailjsServiceId = sanitizeText(document.getElementById("s-emailjs-service-id").value, 120);
   const emailjsTemplateId = sanitizeText(document.getElementById("s-emailjs-template-id").value, 120);
@@ -2131,10 +2140,6 @@ function saveSettings() {
     alert("Set Backend API URL to enable backend auto send.");
     return;
   }
-  if (resumeAutoSend === "backend" && !resumeBackendApiKey) {
-    alert("Set Backend API Key to enable backend auto send.");
-    return;
-  }
   if (resumeAutoSend === "emailjs") {
     if (!defaultSenderEmail) {
       alert("Set a default sender email to enable auto send.");
@@ -2144,30 +2149,6 @@ function saveSettings() {
       alert("EmailJS Public Key, Service ID, and Template ID are required for auto send.");
       return;
     }
-  }
-
-  const currentPwd = document.getElementById("s-current-pwd").value.trim();
-  const newPwd = document.getElementById("s-new-pwd").value.trim();
-  const confirmPwd = document.getElementById("s-confirm-pwd").value.trim();
-  const wantsPasswordChange = currentPwd || newPwd || confirmPwd;
-
-  if (wantsPasswordChange) {
-    if (currentPwd !== getAdminPwd()) {
-      alert("Current admin password is incorrect.");
-      return;
-    }
-    if (newPwd !== confirmPwd) {
-      alert("New password and confirmation do not match.");
-      return;
-    }
-    if (!isStrongPassword(newPwd)) {
-      alert("Password must be at least 10 chars and include upper, lower, number, and symbol.");
-      return;
-    }
-    localStorage.setItem(ADMIN_PWD_KEY, newPwd);
-    document.getElementById("s-current-pwd").value = "";
-    document.getElementById("s-new-pwd").value = "";
-    document.getElementById("s-confirm-pwd").value = "";
   }
 
   store.settings = {
@@ -2184,7 +2165,6 @@ function saveSettings() {
     resumeAutoSend,
     resumeFileUrl,
     resumeBackendUrl,
-    resumeBackendApiKey,
     emailjsPublicKey,
     emailjsServiceId,
     emailjsTemplateId
@@ -2192,7 +2172,7 @@ function saveSettings() {
   saveStore(store);
   applySettingsToProfile(store.settings);
   populateSettingsForm(store.settings);
-  showToast(wantsPasswordChange ? "Settings + password updated!" : "Settings saved!");
+  showToast("Settings saved!");
 }
 
 function saveLinkedIn() {
