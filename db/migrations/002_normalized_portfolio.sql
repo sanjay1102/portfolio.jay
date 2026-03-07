@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS experiences (
   period TEXT,
   role_title TEXT,
   company TEXT,
-  current_role BOOLEAN NOT NULL DEFAULT FALSE,
+  is_current BOOLEAN NOT NULL DEFAULT FALSE,
   sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

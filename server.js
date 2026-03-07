@@ -263,7 +263,7 @@ async function ensureDbSchema() {
       period TEXT,
       role_title TEXT,
       company TEXT,
-      current_role BOOLEAN NOT NULL DEFAULT FALSE,
+      is_current BOOLEAN NOT NULL DEFAULT FALSE,
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -347,6 +347,27 @@ async function ensureDbSchema() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+  `);
+
+  await dbPool.query(`
+    DO $$
+    BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'experiences'
+          AND column_name = 'current_role'
+      ) AND NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'experiences'
+          AND column_name = 'is_current'
+      ) THEN
+        ALTER TABLE experiences RENAME COLUMN current_role TO is_current;
+      END IF;
+    END $$;
   `);
 }
 
@@ -434,7 +455,7 @@ async function writeSnapshotToNormalized(client, snapshot) {
     const e = safeObj(experiences[i]);
     const experienceId = safeId(e.id);
     await client.query(
-      `INSERT INTO experiences (id,period,role_title,company,current_role,sort_order,updated_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
+      `INSERT INTO experiences (id,period,role_title,company,is_current,sort_order,updated_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
       [experienceId, safeStr(e.period, 120), safeStr(e.role, 200), safeStr(e.company, 240), safeBool(e.current), i]
     );
     const points = safeArr(e.points);
@@ -592,7 +613,7 @@ async function loadSnapshotFromNormalized(client) {
       period: e.period || "",
       role: e.role_title || "",
       company: e.company || "",
-      current: Boolean(e.current_role),
+      current: Boolean(e.is_current),
       points: pointsByExperience.get(Number(e.id)) || []
     })),
     certifications: certsQ.rows.map(c => ({
