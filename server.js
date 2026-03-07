@@ -261,7 +261,7 @@ async function ensureDbSchema() {
     CREATE TABLE IF NOT EXISTS experiences (
       id BIGINT PRIMARY KEY,
       period TEXT,
-      role TEXT,
+      role_title TEXT,
       company TEXT,
       current_role BOOLEAN NOT NULL DEFAULT FALSE,
       sort_order INTEGER NOT NULL DEFAULT 0,
@@ -434,7 +434,7 @@ async function writeSnapshotToNormalized(client, snapshot) {
     const e = safeObj(experiences[i]);
     const experienceId = safeId(e.id);
     await client.query(
-      `INSERT INTO experiences (id,period,role,company,current_role,sort_order,updated_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
+      `INSERT INTO experiences (id,period,role_title,company,current_role,sort_order,updated_at) VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
       [experienceId, safeStr(e.period, 120), safeStr(e.role, 200), safeStr(e.company, 240), safeBool(e.current), i]
     );
     const points = safeArr(e.points);
@@ -590,7 +590,7 @@ async function loadSnapshotFromNormalized(client) {
     experiences: experiencesQ.rows.map(e => ({
       id: Number(e.id),
       period: e.period || "",
-      role: e.role || "",
+      role: e.role_title || "",
       company: e.company || "",
       current: Boolean(e.current_role),
       points: pointsByExperience.get(Number(e.id)) || []

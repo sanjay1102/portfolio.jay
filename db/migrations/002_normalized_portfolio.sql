@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TABLE IF NOT EXISTS experiences (
   id BIGINT PRIMARY KEY,
   period TEXT,
-  role TEXT,
+  role_title TEXT,
   company TEXT,
   current_role BOOLEAN NOT NULL DEFAULT FALSE,
   sort_order INTEGER NOT NULL DEFAULT 0,
