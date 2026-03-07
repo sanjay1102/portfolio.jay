@@ -20,6 +20,7 @@ Required:
 - `SESSION_SECRET`: long random secret (at least 32 chars)
 - `ADMIN_PASSWORD_HASH` (recommended) or `ADMIN_PASSWORD`
 - `ALLOWED_ORIGINS`: your frontend domain(s)
+- `DATABASE_URL`: PostgreSQL connection string (Render/Neon/Supabase)
 - `RESUME_FILE_PATH`: absolute path to your private PDF on the server
 - `FROM_NAME` / `FROM_EMAIL`
 
@@ -70,6 +71,17 @@ RESUME_FILE_PATH=/opt/render/project/src/private/SanjayNathan_Resumee.pdf
 
 - Backend now sets `trust proxy` to avoid rate-limit proxy warnings on Render.
 - If SMTP times out on free hosting, use `EMAIL_PROVIDER=brevo` instead of SMTP.
+
+## Database-backed admin data sync
+
+The backend now stores admin portfolio content in PostgreSQL using normalized tables
+(`site_settings`, `projects`, `experiences`, `trainings`, `volunteerings`, etc.).
+Frontend admin automatically:
+
+- pulls latest state from DB right after successful admin login
+- pushes updates to DB when content is saved
+
+This prevents data loss when switching domains/devices/browsers.
 
 ## Security notes
 

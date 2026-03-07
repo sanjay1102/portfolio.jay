@@ -1329,6 +1329,53 @@ function getStore() {
 
 function saveStore(data) {
   localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  enqueueBackendStoreSync(data);
+}
+
+let storeSyncTimer = null;
+let storeSyncInFlight = false;
+
+function canUseBackendDataSync(settings) {
+  return Boolean(settings && settings.resumeBackendUrl && isSafeBackendUrl(settings.resumeBackendUrl));
+}
+
+function enqueueBackendStoreSync(snapshot) {
+  if (typeof adminLoggedIn === "undefined" || !adminLoggedIn) return;
+  const settings = (snapshot && snapshot.settings) || {};
+  if (!canUseBackendDataSync(settings)) return;
+  if (storeSyncTimer) clearTimeout(storeSyncTimer);
+  storeSyncTimer = setTimeout(() => {
+    syncStoreToBackend(snapshot).catch(() => {});
+  }, 500);
+}
+
+async function syncStoreToBackend(snapshot) {
+  if (storeSyncInFlight) return;
+  const settings = (snapshot && snapshot.settings) || {};
+  if (!canUseBackendDataSync(settings)) return;
+  storeSyncInFlight = true;
+  try {
+    const endpoint = getBackendBaseUrl(settings) + "/api/admin/portfolio-state";
+    await fetch(endpoint, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ data: snapshot })
+    });
+  } finally {
+    storeSyncInFlight = false;
+  }
+}
+
+async function pullStoreFromBackend(settings) {
+  if (!canUseBackendDataSync(settings)) return null;
+  const endpoint = getBackendBaseUrl(settings) + "/api/admin/portfolio-state";
+  const res = await fetch(endpoint, { credentials: "include" });
+  if (!res.ok) return null;
+  const payload = await res.json();
+  const data = payload && payload.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  return data;
 }
 
 function escapeHtml(value) {
@@ -1905,7 +1952,16 @@ async function doLogin() {
     adminLoggedIn = true;
     document.getElementById("admin-login-screen").style.display = "none";
     document.getElementById("admin-dashboard").style.display = "block";
-    const store = getStore();
+    let store = getStore();
+    try {
+      const remoteStore = await pullStoreFromBackend(store.settings || {});
+      if (remoteStore) {
+        saveStore(remoteStore);
+        store = getStore();
+      } else {
+        await syncStoreToBackend(store);
+      }
+    } catch (_syncErr) {}
     const previewSrc = (store.settings && store.settings.photo) || DEFAULT_HERO_PHOTO;
     applyProfilePhoto(previewSrc);
     populateSettingsForm(store.settings || {});
