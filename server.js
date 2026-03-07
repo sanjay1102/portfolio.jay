@@ -365,7 +365,7 @@ async function ensureDbSchema() {
           AND table_name = 'experiences'
           AND column_name = 'is_current'
       ) THEN
-        ALTER TABLE experiences RENAME COLUMN current_role TO is_current;
+        ALTER TABLE experiences RENAME COLUMN "current_role" TO is_current;
       END IF;
     END $$;
   `);
