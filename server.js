@@ -699,6 +699,55 @@ async function loadSnapshotFromNormalized(client) {
   };
 }
 
+function toPublicPortfolioState(data) {
+  const d = data && typeof data === "object" ? data : {};
+  const s = d.settings && typeof d.settings === "object" ? d.settings : {};
+  return {
+    projects: Array.isArray(d.projects) ? d.projects : [],
+    experiences: Array.isArray(d.experiences) ? d.experiences : [],
+    certifications: Array.isArray(d.certifications) ? d.certifications : [],
+    trainings: Array.isArray(d.trainings) ? d.trainings : [],
+    articles: Array.isArray(d.articles) ? d.articles : [],
+    mediumArticles: Array.isArray(d.mediumArticles) ? d.mediumArticles : [],
+    volunteerings: Array.isArray(d.volunteerings) ? d.volunteerings : [],
+    settings: {
+      name: s.name || "",
+      title: s.title || "",
+      email: s.email || "",
+      defaultSenderEmail: s.defaultSenderEmail || "",
+      phone: s.phone || "",
+      location: s.location || "",
+      linkedin: s.linkedin || "",
+      articlesUrl: s.articlesUrl || "",
+      status: s.status || "",
+      aboutIntro: s.aboutIntro || "",
+      summary: s.summary || "",
+      mediumProfileUrl: s.mediumProfileUrl || "",
+      mediumArticlesUrl: s.mediumArticlesUrl || "",
+      resumeAutoSend: s.resumeAutoSend || "",
+      resumeFileUrl: s.resumeFileUrl || "",
+      photo: s.photo || ""
+    }
+  };
+}
+
+app.get("/api/public/portfolio-state", async (_req, res) => {
+  if (!dbPool) {
+    return res.status(503).json({ error: "Database not configured. Set DATABASE_URL." });
+  }
+  const client = await dbPool.connect();
+  try {
+    const data = await loadSnapshotFromNormalized(client);
+    if (!data) return res.json({ ok: true, data: null, updatedAt: null });
+    return res.json({ ok: true, data: toPublicPortfolioState(data), updatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.error("public portfolio-state read error", error);
+    return res.status(500).json({ error: "Failed to read portfolio state" });
+  } finally {
+    client.release();
+  }
+});
+
 app.get("/api/admin/portfolio-state", requireAdminAuth, async (_req, res) => {
   if (!dbPool) {
     return res.status(503).json({ error: "Database not configured. Set DATABASE_URL." });

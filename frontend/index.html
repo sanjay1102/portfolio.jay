@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="portfolio-backend-url" content="https://portfolio-backend-pai4.onrender.com">
 <title>Sanjay Sathiyanathan | IT Support Engineer</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -2850,7 +2851,7 @@ function isSafeBackendUrl(value) {
 }
 
 function getBackendBaseUrl(settings) {
-  const configured = normalizeBackendBaseUrl(settings);
+  const configured = normalizeBackendBaseUrl(settings) || getConfiguredPublicBackendBaseUrl();
   return configured || window.location.origin;
 }
 
@@ -2858,6 +2859,23 @@ function normalizeBackendBaseUrl(settings) {
   const raw = sanitizeText((settings && settings.resumeBackendUrl) || "", 300);
   if (!raw) return "";
   return raw.replace(/\/+$/, "");
+}
+
+function getConfiguredPublicBackendBaseUrl() {
+  const meta = document.querySelector('meta[name="portfolio-backend-url"]');
+  const raw = sanitizeText(((meta && meta.getAttribute("content")) || ""), 300);
+  if (!raw || !isSafeBackendUrl(raw)) return "";
+  return raw.replace(/\/+$/, "");
+}
+
+async function loadPublicStoreFromBackend(settings) {
+  const endpoint = getBackendBaseUrl(settings) + "/api/public/portfolio-state";
+  const res = await fetch(endpoint, { credentials: "omit" });
+  if (!res.ok) return null;
+  const payload = await res.json();
+  const data = payload && payload.data;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  return data;
 }
 
 async function sendResumeWithBackend(req, settings) {
@@ -3217,9 +3235,16 @@ function handleSubmit(e) {
 // ══════════════════════════════════
 // INIT — load from localStorage
 // ══════════════════════════════════
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
   trackSiteView();
-  const store = getStore();
+  let store = getStore();
+  try {
+    const remoteStore = await loadPublicStoreFromBackend(store.settings || {});
+    if (remoteStore) {
+      saveStore(remoteStore);
+      store = remoteStore;
+    }
+  } catch (_e) {}
   const storedPhoto = (store.settings && store.settings.photo) || DEFAULT_HERO_PHOTO;
   populateSettingsForm(store.settings || {});
   applySettingsToProfile(store.settings || {});
