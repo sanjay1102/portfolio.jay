@@ -478,7 +478,66 @@ section{
   background:linear-gradient(90deg, var(--accent), rgba(37,99,235,0.55));
   opacity:0.85;
 }
+.skill-card::after{
+  content:"";
+  position:absolute;
+  inset:auto -40px -60px auto;
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(15,118,110,0.14), transparent 68%);
+  transition:transform 0.45s ease, opacity 0.45s ease;
+  opacity:0.85;
+}
+.skill-card:nth-child(1){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(244,251,252,0.88)),
+    linear-gradient(135deg, rgba(15,118,110,0.06), transparent 55%);
+  border-color:rgba(15,118,110,0.18);
+}
+.skill-card:nth-child(1)::before{background:linear-gradient(90deg, #0f766e, #14b8a6);}
+.skill-card:nth-child(1)::after{background:radial-gradient(circle, rgba(20,184,166,0.18), transparent 68%);}
+.skill-card:nth-child(2){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(245,248,255,0.88)),
+    linear-gradient(135deg, rgba(37,99,235,0.06), transparent 55%);
+  border-color:rgba(37,99,235,0.16);
+}
+.skill-card:nth-child(2)::before{background:linear-gradient(90deg, #2563eb, #38bdf8);}
+.skill-card:nth-child(2)::after{background:radial-gradient(circle, rgba(56,189,248,0.18), transparent 68%);}
+.skill-card:nth-child(3){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,247,255,0.90)),
+    linear-gradient(135deg, rgba(91,110,245,0.06), transparent 55%);
+  border-color:rgba(91,110,245,0.16);
+}
+.skill-card:nth-child(3)::before{background:linear-gradient(90deg, #5b6ef5, #7c3aed);}
+.skill-card:nth-child(3)::after{background:radial-gradient(circle, rgba(124,58,237,0.16), transparent 68%);}
+.skill-card:nth-child(4){
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,248,243,0.90)),
+    linear-gradient(135deg, rgba(183,110,31,0.06), transparent 55%);
+  border-color:rgba(183,110,31,0.18);
+}
+.skill-card:nth-child(4)::before{background:linear-gradient(90deg, #b76e1f, #f97316);}
+.skill-card:nth-child(4)::after{background:radial-gradient(circle, rgba(249,115,22,0.16), transparent 68%);}
 .skill-card:hover,.proj-card:hover,.article-card:hover{transform:translateY(-4px);box-shadow:0 30px 70px rgba(15,23,42,0.12);}
+.skill-card:hover{
+  transform:translateY(-6px) scale(1.01);
+  box-shadow:0 36px 90px rgba(15,23,42,0.14);
+}
+.skill-card:hover::after{
+  transform:translate(-18px, -12px) scale(1.08);
+}
+.skill-card:hover .skill-card-title{
+  transform:translateX(4px);
+}
+.skills-grid .skill-card:nth-child(2n){
+  animation:softFloat 8s ease-in-out infinite;
+}
+.skills-grid .skill-card:nth-child(2n+1){
+  animation:softFloat 9s ease-in-out infinite 0.8s;
+}
 .skill-card-title,.proj-title,.tl-role,.item-row-title{
   font-family:"Space Grotesk",sans-serif;
   color:var(--ink);
@@ -487,6 +546,7 @@ section{
 .skill-card-title{
   font-size:1rem;
   margin-bottom:16px;
+  transition:transform 0.3s ease;
 }
 .skill-tags,.proj-tools{display:flex;flex-wrap:wrap;gap:8px;}
 .skill-tag,.tool-tag,.status-badge,.proj-status{
@@ -501,6 +561,28 @@ section{
   border:1px solid rgba(15,118,110,0.12);
   color:var(--accent-strong);
   border-radius:999px;
+}
+.skill-card:nth-child(2) .skill-tag{
+  background:rgba(37,99,235,0.08);
+  border-color:rgba(37,99,235,0.14);
+  color:#1d4ed8;
+}
+.skill-card:nth-child(3) .skill-tag{
+  background:rgba(91,110,245,0.08);
+  border-color:rgba(91,110,245,0.14);
+  color:#4f46e5;
+}
+.skill-card:nth-child(4) .skill-tag{
+  background:rgba(249,115,22,0.08);
+  border-color:rgba(249,115,22,0.14);
+  color:#c2410c;
+}
+.skill-tag{
+  transition:transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+.skill-card:hover .skill-tag{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(15,23,42,0.08);
 }
 
 .timeline{position:relative;padding-left:18px;}
@@ -692,6 +774,10 @@ footer{
   from{opacity:0;transform:translateY(22px);}
   to{opacity:1;transform:translateY(0);}
 }
+@keyframes softFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-6px);}
+}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 .cursor{
@@ -705,10 +791,10 @@ footer{
 }
 .fade-in{
   opacity:0;
-  transform:translateY(20px);
-  transition:opacity 0.7s ease,transform 0.7s ease;
+  transform:translateY(26px) scale(0.985);
+  transition:opacity 0.8s ease,transform 0.8s ease;
 }
-.fade-in.on{opacity:1;transform:translateY(0);}
+.fade-in.on{opacity:1;transform:translateY(0) scale(1);}
 
 #admin-panel{
   display:none;
