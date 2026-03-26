@@ -89,12 +89,30 @@ nav{
   box-shadow:0 16px 40px rgba(15,23,42,0.08);
 }
 .nav-logo{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
   font-family:"Space Grotesk",sans-serif;
   font-size:1.05rem;
   font-weight:700;
   color:var(--ink);
   text-decoration:none;
   letter-spacing:0.12em;
+}
+.nav-logo-video{
+  width:40px;
+  height:40px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid rgba(15,118,110,0.16);
+  background:#0f766e;
+  box-shadow:0 10px 24px rgba(15,118,110,0.14);
+  flex-shrink:0;
+}
+.nav-logo-text{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
 }
 .nav-logo span{color:var(--accent);}
 .nav-links{display:flex;gap:24px;list-style:none;}
@@ -964,6 +982,8 @@ footer{
     padding:12px 14px;
   }
   .nav-links{display:none;}
+  .nav-logo{gap:10px;}
+  .nav-logo-video{width:34px;height:34px;border-radius:10px;}
   section{padding:76px 22px;}
   #hero{grid-template-columns:1fr;padding-top:118px;gap:28px;}
   .hero-left{padding:28px;}
@@ -981,7 +1001,12 @@ footer{
 
 <!-- NAV -->
 <nav>
-  <a href="#hero" class="nav-logo">SS<span>.</span></a>
+  <a href="#hero" class="nav-logo" aria-label="Sanjay Sathiyanathan home">
+    <video class="nav-logo-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="./assets/logo.mp4" type="video/mp4"/>
+    </video>
+    <span class="nav-logo-text">SS<span>.</span></span>
+  </a>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#skills">Skills</a></li>
